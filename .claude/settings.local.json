@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip:*)",
+      "Bash(findstr:*)",
+      "Bash(python -c:*)",
+      "Bash(mkdir:*)",
+      "Bash(dir:*)",
+      "Bash(npm --version:*)",
+      "Bash(npm install:*)",
+      "Bash(python app.py:*)",
+      "Bash(npm start)",
+      "Bash(timeout:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

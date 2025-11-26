@@ -411,9 +411,9 @@ class ShortcutDistillation:
                 self.HK_idx = idx  # Heavy Key
                 break
         
-        print(f"\n✓ Composés clés identifiés:")
-        print(f"  Clé léger (LK): {self.thermo.compound_names[self.LK_idx]}")
-        print(f"  Clé lourd (HK): {self.thermo.compound_names[self.HK_idx]}")
+        print(f"\n[OK] Composes cles identifies:")
+        print(f"  Cle leger (LK): {self.thermo.compound_names[self.LK_idx]}")
+        print(f"  Cle lourd (HK): {self.thermo.compound_names[self.HK_idx]}")
     
     def material_balance(self, recovery_LK_D=0.95, recovery_HK_B=0.95):
         """
