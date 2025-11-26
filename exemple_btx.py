@@ -16,7 +16,6 @@ from distillation_multicomposants import (
     Compound, ThermodynamicPackage, ShortcutDistillation
 )
 from visualization import DistillationVisualizer, print_design_summary
-
 def exemple_btx_complet():
     """
     Exemple complet: Séparation BTX
