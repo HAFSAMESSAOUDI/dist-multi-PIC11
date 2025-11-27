@@ -1,4 +1,7 @@
 streamlit
 plotly
+matplotlib
 pandas
 numpy
+scipy
+
