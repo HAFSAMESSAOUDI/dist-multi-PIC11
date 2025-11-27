@@ -166,22 +166,33 @@ def simulate_shortcut(compounds, compositions, feed_rate, pressure,
                       feed_thermal_condition, reflux_ratio_multiplier, efficiency):
     """Simulation avec les méthodes simplifiées"""
     try:
-        # Créer les objets Compound
+        # Créer les objets Compound (utiliser les noms pour la bibliothèque thermo)
         compound_objects = []
-        for i, compound_key in enumerate(compounds):
-            comp_data = COMPOUNDS_LIBRARY[compound_key]
-            compound_objects.append(Compound(
-                name=comp_data['name'],
-                Tb_C=comp_data['Tb'],
-                Tc_K=comp_data['Tc'],
-                Pc_bar=comp_data['Pc']
-            ))
+        compound_name_map = {
+            'benzene': 'benzene',
+            'toluene': 'toluene',
+            'o-xylene': 'o-xylene',
+            'ethylbenzene': 'ethylbenzene',
+            'cumene': 'cumene',
+            'styrene': 'styrene',
+            'methanol': 'methanol',
+            'ethanol': 'ethanol',
+            'propanol': '1-propanol',
+            'butanol': '1-butanol',
+            'hexane': 'hexane',
+            'heptane': 'heptane',
+            'octane': 'octane'
+        }
+
+        for compound_key in compounds:
+            thermo_name = compound_name_map.get(compound_key, compound_key)
+            compound_objects.append(Compound(name=thermo_name))
 
         # Package thermodynamique
         thermo = ThermodynamicPackage(compound_objects)
 
         # K-values moyens
-        T_avg = sum([c.Tb_C for c in compound_objects]) / len(compound_objects) + 273.15
+        T_avg = sum([c.Tb for c in compound_objects]) / len(compound_objects)
         K_values = thermo.calculate_K_values(T_avg, pressure)
 
         # Volatilités relatives
@@ -246,8 +257,8 @@ def simulate_shortcut(compounds, compositions, feed_rate, pressure,
                 'bottoms': b_i
             })
 
-        T_top = compound_objects[0].Tb_C
-        T_bottom = compound_objects[-1].Tb_C
+        T_top = compound_objects[0].Tb - 273.15  # Convertir K vers °C
+        T_bottom = compound_objects[-1].Tb - 273.15  # Convertir K vers °C
 
         # Besoins énergétiques (estimation simplifiée)
         lambda_avg = 35000  # kJ/kmol (estimation)
