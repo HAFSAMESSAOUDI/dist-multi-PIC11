@@ -29,6 +29,51 @@ from distillation_multicomposants import ThermodynamicPackage, Compound
 from mesh_solver import MESHSolver
 from activity_models import WilsonModel, NRTLModel, UNIQUACModel, IdealModel
 from economic_optimization import EconomicOptimizer, parametric_study_reflux, parametric_study_pressure
+from pdf_generator import SimulationPDFGenerator
+
+#  Fonction helper pour générer et afficher le bouton de téléchargement PDF
+def display_pdf_download_button(simulation_data, method_name):
+    """
+    Affiche un bouton pour télécharger les résultats en PDF/LaTeX
+
+    Parameters
+    ----------
+    simulation_data : dict
+        Données de simulation
+    method_name : str
+        Nom de la méthode utilisée
+    """
+    st.divider()
+    st.subheader("📥 Télécharger les Résultats")
+
+    col_pdf1, col_pdf2 = st.columns(2)
+
+    with col_pdf1:
+        st.markdown("**Format LaTeX (.tex)**")
+        st.caption("Fichier source LaTeX modifiable")
+
+    with col_pdf2:
+        try:
+            pdf_gen = SimulationPDFGenerator()
+            latex_content = pdf_gen.generate_latex_only(simulation_data, method_name)
+
+            from datetime import datetime
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"rapport_distillation_{timestamp}.tex"
+
+            st.download_button(
+                label="📄 Télécharger LaTeX",
+                data=latex_content.encode('utf-8'),
+                file_name=filename,
+                mime="application/x-latex",
+                use_container_width=True,
+                type="primary"
+            )
+
+            st.info("💡 Compilez ce fichier avec pdfLaTeX ou Overleaf pour obtenir un PDF professionnel")
+
+        except Exception as e:
+            st.error(f"Erreur lors de la génération du rapport: {e}")
 
 # Configuration de la page
 st.set_page_config(
@@ -421,7 +466,7 @@ if st.session_state.current_page == 'home':
     st.subheader("Bienvenue")
     st.write("Sélectionnez un module pour commencer:")
 
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
 
     with col1:
         if st.button("Lancer une Simulation", use_container_width=True, type="primary"):
@@ -441,20 +486,6 @@ if st.session_state.current_page == 'home':
             st.rerun()
         st.caption("Apprendre à utiliser l'application")
 
-    with col4:
-        # Bouton de téléchargement de la documentation PDF
-        pdf_path = os.path.join(os.path.dirname(__file__), "DOCUMENTATION_LATEX.tex")
-        if os.path.exists(pdf_path):
-            with open(pdf_path, "r", encoding="utf-8") as f:
-                pdf_content = f.read()
-            st.download_button(
-                label="📥 Télécharger PDF",
-                data=pdf_content,
-                file_name="Documentation_Distillation.tex",
-                mime="application/x-latex",
-                use_container_width=True
-            )
-        st.caption("Télécharger la documentation complète (LaTeX)")
 
     st.divider()
 
@@ -918,6 +949,22 @@ elif st.session_state.current_page == 'simulation':
 
                 st.info(f"📊 N_min = {N_min:.1f} | R_min = {R_min:.3f} | Point optimal économique ≈ 1.1×R_min | Point typique = 1.3×R_min")
 
+                # Bouton de téléchargement des résultats en PDF
+                simulation_data = {
+                    'parameters': {
+                        'compounds': [{'name': c, 'fraction': z} for c, z in zip(selected_compounds, compositions)],
+                        'feed_flow': feed_flow,
+                        'pressure': pressure,
+                        'recovery_light': recovery_light,
+                        'recovery_heavy': recovery_heavy,
+                        'q': q_value,
+                        'reflux_mult': reflux_multiplier,
+                        'efficiency': efficiency
+                    },
+                    'results': results_shortcut['results']
+                }
+                display_pdf_download_button(simulation_data, "Méthodes Simplifiées")
+
         elif results_shortcut and not results_shortcut['success']:
             st.error(f"Erreur: {results_shortcut['error']}")
 
@@ -1269,6 +1316,41 @@ elif st.session_state.current_page == 'simulation':
                     col_tac2.metric("Capital Annualisé", f"{tac_result['annualized_capital']/1000:.1f} k€/an")
                     col_tac3.metric("Exploitation", f"{tac_result['operating']['total']/1000:.1f} k€/an")
                     col_tac4.metric("Maintenance", f"{tac_result['maintenance']/1000:.1f} k€/an")
+
+                # Bouton de téléchargement des résultats en PDF
+                mesh_simulation_data = {
+                    'parameters': {
+                        'compounds': [{'name': c, 'fraction': z} for c, z in zip(selected_compounds, compositions)],
+                        'feed_flow': feed_flow,
+                        'pressure': pressure,
+                        'recovery_light': recovery_light,
+                        'recovery_heavy': recovery_heavy,
+                        'q': q_value,
+                        'reflux_mult': reflux_multiplier,
+                        'efficiency': efficiency
+                    },
+                    'results': {
+                        'flows': {'distillate': results_mesh['D'], 'bottoms': results_mesh['B']},
+                        'temperatures': {
+                            'top': results_mesh['T'][0] - 273.15,
+                            'bottom': results_mesh['T'][-1] - 273.15,
+                            'feed': results_mesh['T'][results_mesh['feed_stage']] - 273.15
+                        },
+                        'energy': {
+                            'Q_condenser': results_mesh['Q_condenser'],
+                            'Q_reboiler': results_mesh['Q_reboiler']
+                        },
+                        'economic': tac_result,
+                        'column_design': {
+                            'total_stages': results_mesh['n_stages']
+                        },
+                        'convergence': {
+                            'iterations': results_mesh['iterations'],
+                            'error': results_mesh.get('error', 0)
+                        }
+                    }
+                }
+                display_pdf_download_button(mesh_simulation_data, "MESH Rigoureux")
 
             else:
                 st.error(f"Erreur MESH: {results_mesh.get('error', 'Convergence non atteinte')}")
