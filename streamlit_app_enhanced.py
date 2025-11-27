@@ -282,6 +282,110 @@ def simulate_shortcut(compounds, compositions, feed_rate, pressure,
         return {'success': False, 'error': str(e)}
 
 
+def simulate_mesh(compounds, compositions, feed_rate, pressure,
+                  light_recovery, heavy_recovery, feed_condition,
+                  reflux_multiplier, efficiency, thermo_model='Idéal'):
+    """Simulation avec la méthode MESH rigoureuse"""
+    try:
+        # Créer les objets Compound
+        compound_objects = []
+        compound_name_map = {
+            'benzene': 'benzene',
+            'toluene': 'toluene',
+            'o-xylene': 'o-xylene',
+            'ethylbenzene': 'ethylbenzene',
+            'cumene': 'cumene',
+            'styrene': 'styrene',
+            'methanol': 'methanol',
+            'ethanol': 'ethanol',
+            'propanol': '1-propanol',
+            'butanol': '1-butanol',
+            'hexane': 'hexane',
+            'heptane': 'heptane',
+            'octane': 'octane'
+        }
+
+        for compound_key in compounds:
+            thermo_name = compound_name_map.get(compound_key, compound_key)
+            compound_objects.append(Compound(name=thermo_name))
+
+        # Obtenir N et R depuis les méthodes simplifiées pour initialisation
+        shortcut_results = simulate_shortcut(
+            compounds, compositions, feed_rate, pressure,
+            light_recovery, heavy_recovery, feed_condition,
+            reflux_multiplier, efficiency
+        )
+
+        if not shortcut_results['success']:
+            return {'success': False, 'error': 'Échec de l\'initialisation avec méthodes simplifiées'}
+
+        r = shortcut_results['results']
+        N_stages = r['gilliland']['N_real']
+        feed_stage = r['kirkbride']['feed_stage']
+        R = r['gilliland']['R_operating']
+
+        # Estimer D depuis les récupérations
+        D = feed_rate * sum([compositions[i] * light_recovery / 100 if i == 0
+                            else compositions[i] * (1 - heavy_recovery / 100)
+                            for i in range(len(compositions))])
+
+        # Créer le solveur MESH
+        mesh_solver = MESHSolver(
+            compounds=compound_objects,
+            n_stages=N_stages,
+            feed_stage=feed_stage,
+            pressure=pressure
+        )
+
+        # Sélectionner le modèle d'activité
+        if thermo_model == 'Wilson':
+            activity_model = WilsonModel(compound_objects)
+        elif thermo_model == 'NRTL':
+            activity_model = NRTLModel(compound_objects)
+        elif thermo_model == 'UNIQUAC':
+            activity_model = UNIQUACModel(compound_objects)
+        else:
+            activity_model = IdealModel(compound_objects)
+
+        mesh_solver.activity_model = activity_model
+
+        # Résoudre
+        z_F = np.array(compositions)
+        mesh_raw = mesh_solver.solve(feed_rate, z_F, R, D, max_iter=100, verbose=False)
+
+        # Reformater les résultats
+        if mesh_raw['converged']:
+            return {
+                'success': True,
+                'converged': True,
+                'iterations': mesh_raw['iterations'],
+                'n_stages': N_stages,
+                'feed_stage': feed_stage,
+                'R': R,
+                'D': mesh_raw['distillate']['flow'],
+                'B': mesh_raw['bottoms']['flow'],
+                'x_D': mesh_raw['distillate']['composition'],
+                'x_B': mesh_raw['bottoms']['composition'],
+                'T': mesh_raw['temperatures'],
+                'x': mesh_raw['compositions']['liquid'],
+                'y': mesh_raw['compositions']['vapor'],
+                'L': mesh_raw['flows']['liquid'],
+                'V': mesh_raw['flows']['vapor'],
+                'Q_condenser': abs(mesh_raw['duties']['condenser']) / 1000,  # kW
+                'Q_reboiler': abs(mesh_raw['duties']['reboiler']) / 1000,  # kW
+            }
+        else:
+            return {
+                'success': False,
+                'converged': False,
+                'error': f"MESH n'a pas convergé après {mesh_raw['iterations']} itérations"
+            }
+
+    except Exception as e:
+        import traceback
+        return {'success': False, 'error': f"Erreur MESH: {str(e)}\n{traceback.format_exc()}"}
+
+
 # =============================================================================
 # GESTION DE L'ÉTAT DE NAVIGATION
 # =============================================================================
@@ -574,8 +678,12 @@ elif st.session_state.current_page == 'simulation':
                 )
 
         if calculation_method in ['MESH Rigoureux', 'Comparaison']:
-            st.info("Note: MESH Rigoureux nécessite une initialisation complète - Feature en développement")
-            results_mesh = {'success': False, 'error': 'MESH solver integration en cours'}
+            with st.spinner("Calcul rigoureux MESH en cours (peut prendre 10-30 secondes)..."):
+                results_mesh = simulate_mesh(
+                    selected_compounds, compositions, feed_rate, pressure,
+                    light_recovery, heavy_recovery, feed_condition,
+                    reflux_multiplier, efficiency, thermo_model
+                )
 
         # Afficher les résultats
         if calculation_method == 'Méthodes Simplifiées' and results_shortcut and results_shortcut['success']:
@@ -653,6 +761,224 @@ elif st.session_state.current_page == 'simulation':
 
         elif results_shortcut and not results_shortcut['success']:
             st.error(f"Erreur: {results_shortcut['error']}")
+
+        # Affichage pour MESH Rigoureux
+        elif calculation_method == 'MESH Rigoureux' and results_mesh:
+            if results_mesh['success']:
+                st.success(f"Convergence MESH atteinte en {results_mesh['iterations']} itérations!")
+
+                # Métriques principales
+                col1, col2, col3, col4 = st.columns(4)
+                col1.metric("N plateaux", results_mesh['n_stages'])
+                col2.metric("Plateau alim.", results_mesh['feed_stage'])
+                col3.metric("Reflux", f"{results_mesh['R']:.3f}")
+                col4.metric("Itérations", results_mesh['iterations'])
+
+                st.divider()
+
+                # Tabs pour les résultats
+                tab1, tab2, tab3, tab4, tab5 = st.tabs([
+                    "Profils Composition",
+                    "Profils Température",
+                    "Débits",
+                    "Bilans Matière",
+                    "Énergie & TAC"
+                ])
+
+                with tab1:
+                    st.subheader("Profils de Composition Liquide par Plateau")
+                    fig = go.Figure()
+                    for i, comp_key in enumerate(selected_compounds):
+                        comp_name = COMPOUNDS_LIBRARY[comp_key]['name']
+                        x_profile = [results_mesh['x'][stage][i] for stage in range(results_mesh['n_stages'])]
+                        fig.add_trace(go.Scatter(
+                            x=list(range(1, results_mesh['n_stages'] + 1)),
+                            y=x_profile,
+                            mode='lines+markers',
+                            name=comp_name,
+                            line=dict(width=2),
+                            marker=dict(size=6)
+                        ))
+                    fig.update_layout(
+                        xaxis_title="Numéro de Plateau",
+                        yaxis_title="Fraction Molaire Liquide",
+                        height=500,
+                        hovermode='x unified'
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+                    st.info(f"Alimentation au plateau {results_mesh['feed_stage']}")
+
+                with tab2:
+                    st.subheader("Profil de Température dans la Colonne")
+                    T_celsius = [T - 273.15 for T in results_mesh['T']]
+                    fig = go.Figure()
+                    fig.add_trace(go.Scatter(
+                        x=list(range(1, results_mesh['n_stages'] + 1)),
+                        y=T_celsius,
+                        mode='lines+markers',
+                        name='Température',
+                        line=dict(color='#dc2626', width=3),
+                        marker=dict(size=8)
+                    ))
+                    fig.update_layout(
+                        xaxis_title="Numéro de Plateau",
+                        yaxis_title="Température (°C)",
+                        height=500
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+
+                    col_t1, col_t2, col_t3 = st.columns(3)
+                    col_t1.metric("T Tête", f"{T_celsius[0]:.1f} °C")
+                    col_t2.metric("T Alimentation", f"{T_celsius[results_mesh['feed_stage']-1]:.1f} °C")
+                    col_t3.metric("T Fond", f"{T_celsius[-1]:.1f} °C")
+
+                with tab3:
+                    st.subheader("Profils de Débits Liquides et Vapeurs")
+                    fig = make_subplots(
+                        rows=1, cols=2,
+                        subplot_titles=("Débits Liquides (L)", "Débits Vapeurs (V)")
+                    )
+                    fig.add_trace(
+                        go.Scatter(
+                            x=list(range(1, results_mesh['n_stages'] + 1)),
+                            y=results_mesh['L'],
+                            mode='lines+markers',
+                            name='Liquide',
+                            line=dict(color='#2563eb', width=2)
+                        ),
+                        row=1, col=1
+                    )
+                    fig.add_trace(
+                        go.Scatter(
+                            x=list(range(1, results_mesh['n_stages'] + 1)),
+                            y=results_mesh['V'],
+                            mode='lines+markers',
+                            name='Vapeur',
+                            line=dict(color='#f97316', width=2)
+                        ),
+                        row=1, col=2
+                    )
+                    fig.update_xaxes(title_text="Plateau", row=1, col=1)
+                    fig.update_xaxes(title_text="Plateau", row=1, col=2)
+                    fig.update_yaxes(title_text="Débit (kmol/h)", row=1, col=1)
+                    fig.update_yaxes(title_text="Débit (kmol/h)", row=1, col=2)
+                    fig.update_layout(height=400, showlegend=False)
+                    st.plotly_chart(fig, use_container_width=True)
+
+                with tab4:
+                    st.subheader("Bilan Matière MESH")
+
+                    col_bilan1, col_bilan2 = st.columns(2)
+
+                    with col_bilan1:
+                        st.markdown("**Distillat:**")
+                        dist_data = []
+                        for i, comp_key in enumerate(selected_compounds):
+                            dist_data.append({
+                                'Composé': COMPOUNDS_LIBRARY[comp_key]['name'],
+                                'Fraction': f"{results_mesh['x_D'][i]:.4f}",
+                                'Débit (kmol/h)': f"{results_mesh['D'] * results_mesh['x_D'][i]:.3f}"
+                            })
+                        st.table(pd.DataFrame(dist_data))
+                        st.metric("Débit total distillat", f"{results_mesh['D']:.2f} kmol/h")
+
+                    with col_bilan2:
+                        st.markdown("**Résidu:**")
+                        bott_data = []
+                        for i, comp_key in enumerate(selected_compounds):
+                            bott_data.append({
+                                'Composé': COMPOUNDS_LIBRARY[comp_key]['name'],
+                                'Fraction': f"{results_mesh['x_B'][i]:.4f}",
+                                'Débit (kmol/h)': f"{results_mesh['B'] * results_mesh['x_B'][i]:.3f}"
+                            })
+                        st.table(pd.DataFrame(bott_data))
+                        st.metric("Débit total résidu", f"{results_mesh['B']:.2f} kmol/h")
+
+                    st.divider()
+
+                    # Vérification bilan
+                    total_in = feed_rate
+                    total_out = results_mesh['D'] + results_mesh['B']
+                    error_balance = abs(total_in - total_out) / total_in * 100
+
+                    if error_balance < 0.1:
+                        st.success(f"Bilan matière vérifié: F={total_in:.2f} | D+B={total_out:.2f} | Erreur: {error_balance:.4f}%")
+                    else:
+                        st.warning(f"Erreur de bilan: {error_balance:.2f}%")
+
+                with tab5:
+                    st.subheader("Besoins Énergétiques")
+                    col_e1, col_e2 = st.columns(2)
+                    col_e1.metric("Condenseur", f"{results_mesh['Q_condenser']:.1f} kW")
+                    col_e2.metric("Rebouilleur", f"{results_mesh['Q_reboiler']:.1f} kW")
+
+                    st.divider()
+                    st.subheader("Coût Annualisé Total (TAC)")
+
+                    def simulate_func_dummy(R_test):
+                        return results_mesh
+
+                    optimizer = EconomicOptimizer(simulate_func_dummy)
+                    tac_result = optimizer.calculate_TAC(
+                        results_mesh['n_stages'],
+                        results_mesh['R'],
+                        results_mesh['Q_condenser'],
+                        results_mesh['Q_reboiler']
+                    )
+
+                    col_tac1, col_tac2, col_tac3, col_tac4 = st.columns(4)
+                    col_tac1.metric("TAC Total", f"{tac_result['TAC']/1000:.1f} k€/an")
+                    col_tac2.metric("Capital Annualisé", f"{tac_result['annualized_capital']/1000:.1f} k€/an")
+                    col_tac3.metric("Exploitation", f"{tac_result['operating']['total']/1000:.1f} k€/an")
+                    col_tac4.metric("Maintenance", f"{tac_result['maintenance']/1000:.1f} k€/an")
+
+            else:
+                st.error(f"Erreur MESH: {results_mesh.get('error', 'Convergence non atteinte')}")
+
+        # Mode Comparaison
+        elif calculation_method == 'Comparaison':
+            if results_shortcut and results_shortcut['success'] and results_mesh and results_mesh['success']:
+                st.success("Simulation complète: Méthodes Simplifiées + MESH Rigoureux")
+
+                # Comparaison des KPIs
+                st.subheader("Comparaison des Résultats")
+
+                col1, col2, col3 = st.columns(3)
+
+                with col1:
+                    st.markdown("**Méthodes Simplifiées**")
+                    r = results_shortcut['results']
+                    st.write(f"N réel: {r['gilliland']['N_real']}")
+                    st.write(f"R opératoire: {r['gilliland']['R_operating']:.3f}")
+                    st.write(f"T tête: {r['temperatures']['top']:.1f}°C")
+                    st.write(f"T fond: {r['temperatures']['bottom']:.1f}°C")
+
+                with col2:
+                    st.markdown("**MESH Rigoureux**")
+                    st.write(f"N plateaux: {results_mesh['n_stages']}")
+                    st.write(f"R opératoire: {results_mesh['R']:.3f}")
+                    st.write(f"T tête: {results_mesh['T'][0]-273.15:.1f}°C")
+                    st.write(f"T fond: {results_mesh['T'][-1]-273.15:.1f}°C")
+
+                with col3:
+                    st.markdown("**Écarts**")
+                    N_diff = abs(r['gilliland']['N_real'] - results_mesh['n_stages'])
+                    R_diff = abs(r['gilliland']['R_operating'] - results_mesh['R'])
+                    T_top_diff = abs(r['temperatures']['top'] - (results_mesh['T'][0]-273.15))
+                    T_bot_diff = abs(r['temperatures']['bottom'] - (results_mesh['T'][-1]-273.15))
+
+                    st.write(f"ΔN: {N_diff:.0f} plateaux")
+                    st.write(f"ΔR: {R_diff:.3f}")
+                    st.write(f"ΔT tête: {T_top_diff:.1f}°C")
+                    st.write(f"ΔT fond: {T_bot_diff:.1f}°C")
+
+                st.info("Utilisez les onglets ci-dessus pour voir les résultats détaillés de chaque méthode")
+
+            else:
+                if results_shortcut and not results_shortcut['success']:
+                    st.error(f"Erreur Simplifiées: {results_shortcut['error']}")
+                if results_mesh and not results_mesh['success']:
+                    st.error(f"Erreur MESH: {results_mesh.get('error', 'Convergence non atteinte')}")
 
     else:
         st.info("Configurez les paramètres dans la barre latérale et cliquez sur 'Lancer la Simulation'")
