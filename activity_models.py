@@ -4,7 +4,7 @@ Module: Modélisation et Simulation des Procédés
 Prof. BAKHER Zine Elabidine - Filière PIC - UH1
 
 Implémentation des modèles thermodynamiques pour mélanges non-idéaux
-Section 10.1 du PDF - Équation 40
+Éq. 14 (Wilson), Éq. 15 (NRTL), Éq. 16 (UNIQUAC)
 """
 
 import numpy as np
@@ -77,7 +77,7 @@ class ActivityModel:
         # Pressions de vapeur saturante
         P_sat = np.array([comp.vapor_pressure(T) for comp in self.compounds])
 
-        # K-values (Équation 40 du PDF)
+        # K-values (Éq. 14-16 selon le modèle)
         K = (gamma * P_sat) / P
 
         return K

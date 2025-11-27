@@ -97,7 +97,7 @@ class EconomicOptimizer:
     def calculate_capital_cost(self, N, Q_condenser, Q_reboiler, diameter=1.5):
         """
         Calcule le coût d'investissement total
-        (Équation 44 du PDF)
+        (Éq. 18)
 
         Parameters
         ----------
@@ -131,7 +131,7 @@ class EconomicOptimizer:
     def calculate_operating_cost(self, Q_condenser, Q_reboiler):
         """
         Calcule le coût d'exploitation annuel
-        (Équation 45 du PDF)
+        (Éq. 19)
 
         Parameters
         ----------
@@ -164,7 +164,7 @@ class EconomicOptimizer:
     def calculate_TAC(self, N, R, Q_condenser, Q_reboiler, diameter=1.5):
         """
         Calcule le Total Annualized Cost (TAC)
-        (Équation 43 du PDF)
+        (Éq. 17)
 
         TAC = C_capital * CRF + C_operating + C_maintenance
 
