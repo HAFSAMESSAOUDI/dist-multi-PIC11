@@ -401,7 +401,7 @@ col_header1, col_header2 = st.columns([3, 1])
 
 with col_header1:
     st.title("Simulateur de Distillation Multicomposants")
-    st.markdown("**Modélisation et Simulation des Procédés** | Prof. BAKHER Zine Elabidine | PIC UH1 2024-2025")
+    st.markdown("**La distillation - Procédés de Séparation**")
 
 with col_header2:
     if st.session_state.current_page != 'home':
@@ -421,7 +421,7 @@ if st.session_state.current_page == 'home':
     st.subheader("Bienvenue")
     st.write("Sélectionnez un module pour commencer:")
 
-    col1, col2, col3 = st.columns(3)
+    col1, col2, col3, col4 = st.columns(4)
 
     with col1:
         if st.button("Lancer une Simulation", use_container_width=True, type="primary"):
@@ -440,6 +440,21 @@ if st.session_state.current_page == 'home':
             st.session_state.current_page = 'guide'
             st.rerun()
         st.caption("Apprendre à utiliser l'application")
+
+    with col4:
+        # Bouton de téléchargement de la documentation PDF
+        pdf_path = os.path.join(os.path.dirname(__file__), "DOCUMENTATION_LATEX.tex")
+        if os.path.exists(pdf_path):
+            with open(pdf_path, "r", encoding="utf-8") as f:
+                pdf_content = f.read()
+            st.download_button(
+                label="📥 Télécharger PDF",
+                data=pdf_content,
+                file_name="Documentation_Distillation.tex",
+                mime="application/x-latex",
+                use_container_width=True
+            )
+        st.caption("Télécharger la documentation complète (LaTeX)")
 
     st.divider()
 
@@ -1338,7 +1353,7 @@ elif st.session_state.current_page == 'documentation':
 
         st.markdown("""
         <div class="equation">
-        <span class="equation-number">(Éq. 10)</span>
+        <span class="equation-number">(Éq. 1)</span>
         N<sub>min</sub> = ln[(x<sub>LK,D</sub> / x<sub>HK,D</sub>) × (x<sub>HK,B</sub> / x<sub>LK,B</sub>)] / ln(α<sub>avg</sub>)
         </div>
         """, unsafe_allow_html=True)
@@ -1362,14 +1377,14 @@ elif st.session_state.current_page == 'documentation':
 
         st.markdown("""
         <div class="equation">
-        <span class="equation-number">(Éq. 15)</span>
+        <span class="equation-number">(Éq. 2)</span>
         Σ[α<sub>i</sub> × z<sub>i</sub> / (α<sub>i</sub> - θ)] = 1 - q
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown("""
         <div class="equation">
-        <span class="equation-number">(Éq. 16)</span>
+        <span class="equation-number">(Éq. 3)</span>
         R<sub>min</sub> + 1 = Σ[α<sub>i</sub> × x<sub>D,i</sub> / (α<sub>i</sub> - θ)]
         </div>
         """, unsafe_allow_html=True)
@@ -1393,28 +1408,28 @@ elif st.session_state.current_page == 'documentation':
 
         st.markdown("""
         <div class="equation">
-        <span class="equation-number">(Éq. 19)</span>
+        <span class="equation-number">(Éq. 4)</span>
         X = (R - R<sub>min</sub>) / (R + 1)
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown("""
         <div class="equation">
-        <span class="equation-number">(Éq. 20)</span>
+        <span class="equation-number">(Éq. 5)</span>
         Y = 1 - exp[((1 + 54.4X)(X - 1)) / ((11 + 117.2X)√X)]
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown("""
         <div class="equation">
-        <span class="equation-number">(Éq. 21)</span>
+        <span class="equation-number">(Éq. 6)</span>
         N<sub>théorique</sub> = N<sub>min</sub> + Y / (1 - Y)
         </div>
         """, unsafe_allow_html=True)
 
         st.markdown("""
         <div class="equation">
-        <span class="equation-number">(Éq. 22)</span>
+        <span class="equation-number">(Éq. 7)</span>
         N<sub>réel</sub> = N<sub>théorique</sub> / E<sub>Murphree</sub>
         </div>
         """, unsafe_allow_html=True)
@@ -1433,7 +1448,7 @@ elif st.session_state.current_page == 'documentation':
 
         st.markdown("""
         <div class="equation">
-        <span class="equation-number">(Éq. 23)</span>
+        <span class="equation-number">(Éq. 8)</span>
         log(N<sub>R</sub> / N<sub>S</sub>) = 0.206 × log[(B/D) × (x<sub>HK,F</sub>/x<sub>LK,F</sub>) × (x<sub>LK,B</sub>/x<sub>HK,D</sub>)²]
         </div>
         """, unsafe_allow_html=True)
@@ -1466,7 +1481,7 @@ elif st.session_state.current_page == 'documentation':
             st.markdown("**M - Material Balance (Bilan Matière)**")
             st.markdown("""
             <div class="equation">
-            <span class="equation-number">(Éq. 24)</span>
+            <span class="equation-number">(Éq. 9)</span>
             L<sub>j+1</sub>x<sub>i,j+1</sub> + V<sub>j-1</sub>y<sub>i,j-1</sub> - L<sub>j</sub>x<sub>i,j</sub> - V<sub>j</sub>y<sub>i,j</sub> + F<sub>j</sub>z<sub>i,j</sub> = 0
             </div>
             """, unsafe_allow_html=True)
@@ -1480,7 +1495,7 @@ elif st.session_state.current_page == 'documentation':
             st.markdown("**E - Equilibrium (Équilibre)**")
             st.markdown("""
             <div class="equation">
-            <span class="equation-number">(Éq. 30)</span>
+            <span class="equation-number">(Éq. 10)</span>
             y<sub>i,j</sub> = K<sub>i,j</sub> × x<sub>i,j</sub>
             </div>
             """, unsafe_allow_html=True)
@@ -1493,14 +1508,14 @@ elif st.session_state.current_page == 'documentation':
             st.markdown("**S - Summation (Sommation)**")
             st.markdown("""
             <div class="equation">
-            <span class="equation-number">(Éq. 31)</span>
+            <span class="equation-number">(Éq. 11)</span>
             Σ x<sub>i,j</sub> = 1
             </div>
             """, unsafe_allow_html=True)
 
             st.markdown("""
             <div class="equation">
-            <span class="equation-number">(Éq. 32)</span>
+            <span class="equation-number">(Éq. 12)</span>
             Σ y<sub>i,j</sub> = 1
             </div>
             """, unsafe_allow_html=True)
@@ -1510,7 +1525,7 @@ elif st.session_state.current_page == 'documentation':
             st.markdown("**H - Heat Balance (Bilan Enthalpique)**")
             st.markdown("""
             <div class="equation">
-            <span class="equation-number">(Éq. 33)</span>
+            <span class="equation-number">(Éq. 13)</span>
             L<sub>j+1</sub>h<sub>j+1</sub> + V<sub>j-1</sub>H<sub>j-1</sub> - L<sub>j</sub>h<sub>j</sub> - V<sub>j</sub>H<sub>j</sub> + F<sub>j</sub>h<sub>F</sub> + Q<sub>j</sub> = 0
             </div>
             """, unsafe_allow_html=True)
@@ -1557,7 +1572,7 @@ elif st.session_state.current_page == 'documentation':
         st.markdown("#### 2. Modèle de Wilson")
         st.markdown("""
         <div class="equation">
-        <span class="equation-number">(Éq. 40a)</span>
+        <span class="equation-number">(Éq. 14)</span>
         ln(γ<sub>i</sub>) = 1 - ln(Σ<sub>j</sub> x<sub>j</sub> Λ<sub>ij</sub>) - Σ<sub>k</sub> [x<sub>k</sub> Λ<sub>ki</sub> / Σ<sub>j</sub> x<sub>j</sub> Λ<sub>kj</sub>]
         </div>
         """, unsafe_allow_html=True)
@@ -1574,7 +1589,7 @@ elif st.session_state.current_page == 'documentation':
         st.markdown("#### 3. Modèle NRTL")
         st.markdown("""
         <div class="equation">
-        <span class="equation-number">(Éq. 40b)</span>
+        <span class="equation-number">(Éq. 15)</span>
         G<sub>ij</sub> = exp(-α<sub>ij</sub> τ<sub>ij</sub>), τ<sub>ij</sub> = a<sub>ij</sub> / T
         </div>
         """, unsafe_allow_html=True)
@@ -1589,7 +1604,7 @@ elif st.session_state.current_page == 'documentation':
         st.markdown("#### 4. Modèle UNIQUAC")
         st.markdown("""
         <div class="equation">
-        <span class="equation-number">(Éq. 40c)</span>
+        <span class="equation-number">(Éq. 16)</span>
         ln(γ<sub>i</sub>) = ln(γ<sub>i</sub><sup>C</sup>) + ln(γ<sub>i</sub><sup>R</sup>)
         </div>
         """, unsafe_allow_html=True)
@@ -1615,7 +1630,7 @@ elif st.session_state.current_page == 'documentation':
 
         st.markdown("""
         <div class="equation">
-        <span class="equation-number">(Éq. 43)</span>
+        <span class="equation-number">(Éq. 17)</span>
         TAC = C<sub>capital</sub> × CRF + C<sub>operating</sub> + C<sub>maintenance</sub>
         </div>
         """, unsafe_allow_html=True)
@@ -1626,7 +1641,7 @@ elif st.session_state.current_page == 'documentation':
             st.markdown("**Coûts d'Investissement**")
             st.markdown("""
             <div class="equation">
-            <span class="equation-number">(Éq. 44)</span>
+            <span class="equation-number">(Éq. 18)</span>
             C<sub>capital</sub> = C<sub>colonne</sub> + C<sub>condenseur</sub> + C<sub>rebouilleur</sub>
             </div>
             """, unsafe_allow_html=True)
@@ -1642,7 +1657,7 @@ elif st.session_state.current_page == 'documentation':
             st.markdown("**Coûts d'Exploitation**")
             st.markdown("""
             <div class="equation">
-            <span class="equation-number">(Éq. 45)</span>
+            <span class="equation-number">(Éq. 19)</span>
             C<sub>operating</sub> = C<sub>énergie</sub> + C<sub>refroidissement</sub>
             </div>
             """, unsafe_allow_html=True)
@@ -1657,7 +1672,7 @@ elif st.session_state.current_page == 'documentation':
             st.markdown("**Coûts de Maintenance**")
             st.markdown("""
             <div class="equation">
-            <span class="equation-number">(Éq. 46)</span>
+            <span class="equation-number">(Éq. 20)</span>
             C<sub>maintenance</sub> = 0.05 × C<sub>capital</sub>
             </div>
             """, unsafe_allow_html=True)
