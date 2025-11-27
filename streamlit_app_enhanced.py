@@ -32,136 +32,47 @@ from economic_optimization import EconomicOptimizer, parametric_study_reflux, pa
 
 # Configuration de la page
 st.set_page_config(
-    page_title="Distillation Multicomposants",
-    page_icon="⚗️",
+    page_title="Distillation Multicomposants - Complet",
+    page_icon="🧪",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Initialize session state for navigation
-if 'current_page' not in st.session_state:
-    st.session_state.current_page = 'Home'
-
-# CSS personnalisé - Clean and Professional
+# CSS personnalisé
 st.markdown("""
 <style>
-    /* Main Layout */
     .main {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
     }
-    
-    /* Navigation Buttons */
-    .nav-button {
-        display: inline-block;
-        padding: 12px 24px;
-        margin: 5px;
-        background: white;
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        color: #2c3e50;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 14px;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        text-align: center;
-    }
-    
-    .nav-button:hover {
-        background: #667eea;
-        color: white;
-        border-color: #667eea;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-    
-    .nav-button.active {
-        background: #667eea;
-        color: white;
-        border-color: #667eea;
-    }
-    
-    /* Headers */
-    h1 {
-        color: #2c3e50 !important;
-        font-weight: 700 !important;
-        letter-spacing: -0.5px !important;
-    }
-    
-    h2 {
-        color: #34495e !important;
-        font-weight: 600 !important;
-    }
-    
-    h3 {
-        color: #667eea !important;
-        font-weight: 600 !important;
-    }
-    
-    /* Cards */
-    .info-card {
-        background: white;
-        padding: 24px;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        margin: 16px 0;
-        border-left: 4px solid #667eea;
-    }
-    
-    .feature-card {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-        margin: 12px 0;
-        transition: all 0.3s ease;
-    }
-    
-    .feature-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-        transform: translateY(-2px);
-    }
-    
-    /* Buttons */
     .stButton>button {
         width: 100%;
-        background: #667eea;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        font-weight: 600;
-        border-radius: 8px;
-        padding: 14px;
-        border: none;
-        transition: all 0.3s ease;
-    }
-    
-    .stButton>button:hover {
-        background: #5568d3;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-    
-    /* Metrics */
-    .stMetric {
-        background: white;
-        padding: 16px;
+        font-weight: bold;
         border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-    }
-    
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-    }
-    
-    /* Divider */
-    hr {
-        margin: 24px 0;
+        padding: 12px;
         border: none;
-        border-top: 2px solid #e0e0e0;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
     }
-    
-    /* Success/Warning/Info boxes */
-    .stSuccess, .stWarning, .stInfo {
-        border-radius: 8px;
+    .stButton>button:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+    }
+    h1, h2, h3 {
+        color: #667eea !important;
+    }
+    .stMetric {
+        background: rgba(102, 126, 234, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid rgba(102, 126, 234, 0.3);
+    }
+    .success-box {
+        background: rgba(102, 234, 126, 0.1);
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid rgba(102, 234, 126, 0.3);
+        margin: 10px 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -341,658 +252,499 @@ def simulate_shortcut(compounds, compositions, feed_rate, pressure,
 
 
 # =============================================================================
-# NAVIGATION
+# INTERFACE STREAMLIT
 # =============================================================================
 
-# Header with Navigation
+# En-tête
 st.markdown("""
-<div style='text-align: center; padding: 32px 20px; background: white; border-radius: 12px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);'>
-    <h1 style='color: #2c3e50; margin: 0; font-size: 32px; font-weight: 700;'>Distillation Multicomposants</h1>
-    <p style='color: #7f8c8d; margin: 12px 0 0 0; font-size: 16px; font-weight: 400;'>
-        Simulation et Optimisation des Procédés de Séparation
+<div style='text-align: center; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; margin-bottom: 30px;'>
+    <h1 style='color: white; margin: 0;'>🧪 Distillation Multicomposants - Version Complète</h1>
+    <p style='color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;'>
+        Méthodes Simplifiées | MESH Rigoureux | Modèles d'Activité | Optimisation Économique
     </p>
 </div>
 """, unsafe_allow_html=True)
 
-# Navigation Menu
-col1, col2, col3, col4, col5 = st.columns(5)
-
-with col1:
-    if st.button("Home", key="nav_home", use_container_width=True):
-        st.session_state.current_page = 'Home'
-        st.rerun()
-
-with col2:
-    if st.button("Méthodes Simplifiées", key="nav_shortcut", use_container_width=True):
-        st.session_state.current_page = 'Shortcut'
-        st.rerun()
-
-with col3:
-    if st.button("MESH Rigoureux", key="nav_mesh", use_container_width=True):
-        st.session_state.current_page = 'MESH'
-        st.rerun()
-
-with col4:
-    if st.button("Comparaison", key="nav_compare", use_container_width=True):
-        st.session_state.current_page = 'Comparison'
-        st.rerun()
-
-with col5:
-    if st.button("Documentation", key="nav_docs", use_container_width=True):
-        st.session_state.current_page = 'Documentation'
-        st.rerun()
-
-st.markdown("---")
-
 # =============================================================================
-# HOME PAGE
+# SIDEBAR
 # =============================================================================
 
-if st.session_state.current_page == 'Home':
-    # Welcome Section
-    st.markdown("""
-    <div class='info-card'>
-        <h2 style='margin-top: 0;'>Bienvenue</h2>
-        <p style='font-size: 16px; line-height: 1.6; color: #555;'>
-            Cette application permet la simulation complète de colonnes de distillation multicomposants 
-            en utilisant différentes approches de calcul, des méthodes simplifiées aux modèles rigoureux.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Features Grid
-    st.markdown("### Fonctionnalités Principales")
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("""
-        <div class='feature-card'>
-            <h3 style='margin-top: 0; color: #667eea;'>Méthodes Simplifiées</h3>
-            <p style='color: #666; line-height: 1.6;'>
-                Calculs rapides utilisant les corrélations classiques de Fenske, Underwood, 
-                Gilliland et Kirkbride pour un dimensionnement préliminaire.
-            </p>
-            <ul style='color: #666;'>
-                <li>Nombre minimum de plateaux (Fenske)</li>
-                <li>Reflux minimum (Underwood)</li>
-                <li>Nombre de plateaux réels (Gilliland)</li>
-                <li>Position d'alimentation (Kirkbride)</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class='feature-card'>
-            <h3 style='margin-top: 0; color: #667eea;'>Modèles d'Activité</h3>
-            <p style='color: #666; line-height: 1.6;'>
-                Prise en compte des non-idéalités avec plusieurs modèles thermodynamiques.
-            </p>
-            <ul style='color: #666;'>
-                <li>Modèle Idéal (Loi de Raoult)</li>
-                <li>Wilson</li>
-                <li>NRTL</li>
-                <li>UNIQUAC</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class='feature-card'>
-            <h3 style='margin-top: 0; color: #667eea;'>MESH Rigoureux</h3>
-            <p style='color: #666; line-height: 1.6;'>
-                Résolution rigoureuse des équations MESH (Material, Equilibrium, Summation, Heat) 
-                pour une précision maximale.
-            </p>
-            <ul style='color: #666;'>
-                <li>Bilans matière plateau par plateau</li>
-                <li>Équilibres thermodynamiques rigoureux</li>
-                <li>Profils de température et composition</li>
-                <li>Convergence garantie</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("""
-        <div class='feature-card'>
-            <h3 style='margin-top: 0; color: #667eea;'>Optimisation Économique</h3>
-            <p style='color: #666; line-height: 1.6;'>
-                Minimisation du coût annuel total (TAC) et études paramétriques.
-            </p>
-            <ul style='color: #666;'>
-                <li>Calcul du TAC (CAPEX + OPEX)</li>
-                <li>Études de sensibilité</li>
-                <li>Optimisation reflux/pression</li>
-                <li>Analyse économique détaillée</li>
-            </ul>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    # Quick Start Guide
-    st.markdown("---")
-    st.markdown("### Guide de Démarrage Rapide")
-    
-    st.markdown("""
-    <div class='info-card'>
-        <ol style='font-size: 15px; line-height: 1.8; color: #555;'>
-            <li><strong>Choisissez une méthode</strong> dans le menu de navigation ci-dessus</li>
-            <li><strong>Configurez les paramètres</strong> dans la barre latérale (composés, débits, conditions opératoires)</li>
-            <li><strong>Lancez la simulation</strong> en cliquant sur le bouton de calcul</li>
-            <li><strong>Analysez les résultats</strong> dans les différents onglets (graphiques, tableaux, détails)</li>
-        </ol>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # About Section
-    st.markdown("---")
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        st.markdown("""
-        <div class='info-card'>
-            <h3 style='margin-top: 0;'>À Propos</h3>
-            <p style='color: #666; line-height: 1.6;'>
-                <strong>Module:</strong> Modélisation et Simulation des Procédés<br>
-                <strong>Professeur:</strong> BAKHER Zine Elabidine<br>
-                <strong>Filière:</strong> PIC - Université UH1<br>
-                <strong>Année:</strong> 2024-2025
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown("""
-        <div class='info-card'>
-            <h3 style='margin-top: 0;'>Bibliothèque de Composés</h3>
-            <p style='color: #666; line-height: 1.6;'>
-                <strong>{}</strong> composés disponibles<br>
-                Hydrocarbures aromatiques, alcools, alcanes
-            </p>
-        </div>
-        """.format(len(COMPOUNDS_LIBRARY)), unsafe_allow_html=True)
+with st.sidebar:
+    st.header("⚙️ Configuration")
 
-# =============================================================================
-# SIDEBAR FOR SIMULATION PAGES
-# =============================================================================
+    # Sélection de la méthode
+    st.subheader("📊 Méthode de Calcul")
+    calculation_method = st.selectbox(
+        "Choisir la méthode",
+        ['Méthodes Simplifiées', 'MESH Rigoureux', 'Comparaison'],
+        help="Méthodes simplifiées: rapides mais approximatives\nMESH: rigoureux et précis\nComparaison: affiche les deux"
+    )
 
-elif st.session_state.current_page in ['Shortcut', 'MESH', 'Comparison']:
-    with st.sidebar:
-        st.markdown("### Configuration")
-        
-        # Map page to calculation method
-        page_to_method = {
-            'Shortcut': 'Méthodes Simplifiées',
-            'MESH': 'MESH Rigoureux',
-            'Comparison': 'Comparaison'
-        }
-        calculation_method = page_to_method[st.session_state.current_page]
+    # Modèle thermodynamique
+    if calculation_method in ['MESH Rigoureux', 'Comparaison']:
+        st.subheader("🔬 Modèle Thermodynamique")
+        thermo_model = st.selectbox(
+            "Modèle d'activité",
+            ['Idéal', 'Wilson', 'NRTL', 'UNIQUAC'],
+            help="Choisir le modèle pour les coefficients d'activité"
+        )
+    else:
+        thermo_model = 'Idéal'
 
-        # Modèle thermodynamique
-        if calculation_method in ['MESH Rigoureux', 'Comparaison']:
-            st.markdown("#### Modèle Thermodynamique")
-            thermo_model = st.selectbox(
-                "Modèle d'activité",
-                ['Idéal', 'Wilson', 'NRTL', 'UNIQUAC'],
-                help="Choisir le modèle pour les coefficients d'activité"
+    st.divider()
+
+    # Sélection des composés
+    st.subheader("🧬 Composés")
+    selected_compounds = st.multiselect(
+        "Sélectionner les composés",
+        options=list(COMPOUNDS_LIBRARY.keys()),
+        default=['benzene', 'toluene'],
+        format_func=lambda x: f"{COMPOUNDS_LIBRARY[x]['name']} ({COMPOUNDS_LIBRARY[x]['formula']})"
+    )
+
+    # Compositions
+    if len(selected_compounds) >= 2:
+        st.subheader("📊 Compositions (%)")
+        compositions = []
+        total_comp = 0
+
+        for compound_key in selected_compounds:
+            comp_value = st.number_input(
+                f"{COMPOUNDS_LIBRARY[compound_key]['name']}",
+                min_value=0.0,
+                max_value=100.0,
+                value=100.0 / len(selected_compounds),
+                step=1.0,
+                key=f"comp_{compound_key}"
             )
+            compositions.append(comp_value)
+            total_comp += comp_value
+
+        if abs(total_comp - 100.0) > 0.1:
+            st.warning(f"⚠️ Total = {total_comp:.1f}% (devrait être 100%)")
+            if st.button("🔄 Normaliser"):
+                st.rerun()
         else:
-            thermo_model = 'Idéal'
+            st.success(f"✅ Total = {total_comp:.1f}%")
 
         st.divider()
 
-        # Sélection des composés
-        st.markdown("#### Composés")
-        selected_compounds = st.multiselect(
-            "Sélectionner les composés",
-            options=list(COMPOUNDS_LIBRARY.keys()),
-            default=['benzene', 'toluene'],
-            format_func=lambda x: f"{COMPOUNDS_LIBRARY[x]['name']} ({COMPOUNDS_LIBRARY[x]['formula']})"
+        # Paramètres opératoires
+        st.subheader("⚙️ Paramètres Opératoires")
+
+        feed_rate = st.number_input(
+            "Débit d'alimentation (kmol/h)",
+            min_value=1.0,
+            max_value=10000.0,
+            value=100.0,
+            step=10.0
         )
 
-        # Compositions
-        if len(selected_compounds) >= 2:
-            st.markdown("#### Compositions (%)")
-            compositions = []
-            total_comp = 0
+        pressure = st.number_input(
+            "Pression (Pa)",
+            min_value=10000.0,
+            max_value=1000000.0,
+            value=101325.0,
+            step=10000.0
+        )
 
-            for compound_key in selected_compounds:
-                comp_value = st.number_input(
-                    f"{COMPOUNDS_LIBRARY[compound_key]['name']}",
-                    min_value=0.0,
-                    max_value=100.0,
-                    value=100.0 / len(selected_compounds),
-                    step=1.0,
-                    key=f"comp_{compound_key}"
-                )
-                compositions.append(comp_value)
-                total_comp += comp_value
+        feed_condition = st.selectbox(
+            "Condition thermique de l'alimentation",
+            ['saturated_liquid', 'saturated_vapor', 'subcooled_liquid',
+             'superheated_vapor', 'two_phase'],
+            format_func=lambda x: {
+                'saturated_liquid': 'Liquide saturé (q=1)',
+                'saturated_vapor': 'Vapeur saturée (q=0)',
+                'subcooled_liquid': 'Liquide sous-refroidi (q>1)',
+                'superheated_vapor': 'Vapeur surchauffée (q<0)',
+                'two_phase': 'Mélange biphasique (0<q<1)'
+            }[x]
+        )
 
-            if abs(total_comp - 100.0) > 0.1:
-                st.warning(f"Total = {total_comp:.1f}% (devrait être 100%)")
-                if st.button("Normaliser", use_container_width=True):
-                    st.rerun()
-            else:
-                st.success(f"Total = {total_comp:.1f}%")
+        st.divider()
 
-            st.divider()
+        # Spécifications
+        st.subheader("🎯 Spécifications")
 
-            # Paramètres opératoires
-            st.markdown("#### Paramètres Opératoires")
+        light_recovery = st.slider(
+            "Récupération composé léger (%)",
+            min_value=80.0,
+            max_value=99.9,
+            value=95.0,
+            step=0.1
+        ) / 100
 
-            feed_rate = st.number_input(
-                "Débit d'alimentation (kmol/h)",
-                min_value=1.0,
-                max_value=10000.0,
-                value=100.0,
-                step=10.0
+        heavy_recovery = st.slider(
+            "Récupération composé lourd (%)",
+            min_value=80.0,
+            max_value=99.9,
+            value=95.0,
+            step=0.1
+        ) / 100
+
+        reflux_multiplier = st.slider(
+            "Multiplicateur de reflux",
+            min_value=1.1,
+            max_value=3.0,
+            value=1.3,
+            step=0.1
+        )
+
+        efficiency = st.slider(
+            "Efficacité des plateaux (%)",
+            min_value=50.0,
+            max_value=95.0,
+            value=70.0,
+            step=5.0
+        ) / 100
+
+        st.divider()
+
+        # Bouton simulation
+        run_simulation = st.button("🚀 LANCER LA SIMULATION", use_container_width=True)
+    else:
+        st.warning("⚠️ Sélectionnez au moins 2 composés")
+        run_simulation = False
+
+# =============================================================================
+# ZONE PRINCIPALE
+# =============================================================================
+
+if run_simulation and len(selected_compounds) >= 2:
+    with st.spinner('🔄 Simulation en cours...'):
+
+        # Simulation par méthodes simplifiées
+        if calculation_method in ['Méthodes Simplifiées', 'Comparaison']:
+            results_shortcut = simulate_shortcut(
+                selected_compounds,
+                [c / 100 for c in compositions],
+                feed_rate,
+                pressure,
+                light_recovery,
+                heavy_recovery,
+                feed_condition,
+                reflux_multiplier,
+                efficiency
             )
 
-            pressure = st.number_input(
-                "Pression (Pa)",
-                min_value=10000.0,
-                max_value=1000000.0,
-                value=101325.0,
-                step=10000.0
-            )
+        # Simulation MESH
+        if calculation_method in ['MESH Rigoureux', 'Comparaison']:
+            try:
+                # Créer les composés
+                compound_objects = [Compound(name) for name in selected_compounds]
 
-            feed_condition = st.selectbox(
-                "Condition thermique de l'alimentation",
-                ['saturated_liquid', 'saturated_vapor', 'subcooled_liquid',
-                 'superheated_vapor', 'two_phase'],
-                format_func=lambda x: {
-                    'saturated_liquid': 'Liquide saturé (q=1)',
-                    'saturated_vapor': 'Vapeur saturée (q=0)',
-                    'subcooled_liquid': 'Liquide sous-refroidi (q>1)',
-                    'superheated_vapor': 'Vapeur surchauffée (q<0)',
-                    'two_phase': 'Mélange biphasique (0<q<1)'
-                }[x]
-            )
+                # Normaliser compositions
+                z_F = np.array([c / 100 for c in compositions])
+                z_F = z_F / np.sum(z_F)
 
-            st.divider()
-
-            # Spécifications
-            st.markdown("#### Spécifications")
-
-            light_recovery = st.slider(
-                "Récupération composé léger (%)",
-                min_value=80.0,
-                max_value=99.9,
-                value=95.0,
-                step=0.1
-            ) / 100
-
-            heavy_recovery = st.slider(
-                "Récupération composé lourd (%)",
-                min_value=80.0,
-                max_value=99.9,
-                value=95.0,
-                step=0.1
-            ) / 100
-
-            reflux_multiplier = st.slider(
-                "Multiplicateur de reflux",
-                min_value=1.1,
-                max_value=3.0,
-                value=1.3,
-                step=0.1
-            )
-
-            efficiency = st.slider(
-                "Efficacité des plateaux (%)",
-                min_value=50.0,
-                max_value=95.0,
-                value=70.0,
-                step=5.0
-            ) / 100
-
-            st.divider()
-
-            # Bouton simulation
-            run_simulation = st.button("LANCER LA SIMULATION", use_container_width=True)
-        else:
-            st.warning("Sélectionnez au moins 2 composés")
-            run_simulation = False
-
-    # =============================================================================
-    # ZONE PRINCIPALE
-    # =============================================================================
-
-    if run_simulation and len(selected_compounds) >= 2:
-        with st.spinner('Simulation en cours...'):
-
-            # Simulation par méthodes simplifiées
-            if calculation_method in ['Méthodes Simplifiées', 'Comparaison']:
-                results_shortcut = simulate_shortcut(
-                    selected_compounds,
-                    [c / 100 for c in compositions],
-                    feed_rate,
-                    pressure,
-                    light_recovery,
-                    heavy_recovery,
-                    feed_condition,
-                    reflux_multiplier,
-                    efficiency
-                )
-
-            # Simulation MESH
-            if calculation_method in ['MESH Rigoureux', 'Comparaison']:
-                try:
-                    # Créer les composés
-                    compound_objects = [Compound(name) for name in selected_compounds]
-
-                    # Normaliser compositions
-                    z_F = np.array([c / 100 for c in compositions])
-                    z_F = z_F / np.sum(z_F)
-
-                    # Paramètres depuis shortcut si disponible
-                    if calculation_method == 'Comparaison' and results_shortcut['success']:
-                        N_stages = results_shortcut['results']['gilliland']['N_real']
-                        feed_stage = results_shortcut['results']['kirkbride']['feed_stage']
-                        R_min = results_shortcut['results']['underwood']['R_min']
-                    else:
-                        N_stages = 20
-                        feed_stage = 10
-                        R_min = 1.5
-
-                    R = R_min * reflux_multiplier
-                    D = feed_rate * z_F[0] * light_recovery / light_recovery
-
-                    # Créer le solver MESH
-                    mesh_solver = MESHSolver(
-                        compound_objects,
-                        N_stages,
-                        feed_stage,
-                        pressure
-                    )
-
-                    # Choisir le modèle d'activité
-                    if thermo_model == 'Wilson':
-                        activity_model = WilsonModel(compound_objects)
-                    elif thermo_model == 'NRTL':
-                        activity_model = NRTLModel(compound_objects)
-                    elif thermo_model == 'UNIQUAC':
-                        activity_model = UNIQUACModel(compound_objects)
-                    else:
-                        activity_model = IdealModel(compound_objects)
-
-                    mesh_solver.activity_model = activity_model
-
-                    # Résoudre
-                    mesh_raw = mesh_solver.solve(feed_rate, z_F, R, D, max_iter=100, verbose=False)
-
-                    # Reformater les résultats pour l'affichage
-                    if mesh_raw['converged']:
-                        results_mesh = {
-                            'success': True,
-                            'method': 'MESH',
-                            'converged': True,
-                            'iterations': mesh_raw['iterations'],
-                            'n_stages': N_stages,
-                            'feed_stage': feed_stage,
-                            'R': R,
-                            'D': mesh_raw['distillate']['flow'],
-                            'B': mesh_raw['bottoms']['flow'],
-                            'T': mesh_raw['temperatures'],
-                            'x': mesh_raw['compositions']['liquid'],
-                            'y': mesh_raw['compositions']['vapor'],
-                            'L': mesh_raw['flows']['liquid'],
-                            'V': mesh_raw['flows']['vapor']
-                        }
-                    else:
-                        results_mesh = {
-                            'success': False,
-                            'converged': False,
-                            'error': "MESH n'a pas convergé après {} itérations".format(mesh_raw['iterations'])
-                        }
-
-                except Exception as e:
-                    results_mesh = {'success': False, 'converged': False, 'error': str(e)}
-
-            # Affichage des résultats
-            st.success("Simulation terminée!")
-
-            # Tabs pour différentes vues
-            if calculation_method == 'Méthodes Simplifiées':
-                tabs = st.tabs([
-                    "Vue d'ensemble",
-                    "Distribution",
-                    "Bilans",
-                    "Détails",
-                    "Économie"
-                ])
-
-                if results_shortcut['success']:
-                    r = results_shortcut['results']
-
-                    # TAB 1: Vue d'ensemble
-                    with tabs[0]:
-                        # KPIs
-                        cols = st.columns(5)
-                        cols[0].metric("N min (Fenske)", f"{r['fenske']['N_min']:.2f}")
-                        cols[1].metric("N réel", r['gilliland']['N_real'])
-                        cols[2].metric("R min", f"{r['underwood']['R_min']:.3f}")
-                        cols[3].metric("R opératoire", f"{r['gilliland']['R_operating']:.3f}")
-                        cols[4].metric("Plateau alim.", r['kirkbride']['feed_stage'])
-
-                        st.divider()
-
-                        # Graphiques
-                        col1, col2 = st.columns(2)
-
-                        with col1:
-                            # Pie chart distillat
-                            dist_values = [d['distillate'] for d in r['distribution']]
-                            dist_labels = [d['compound'] for d in r['distribution']]
-
-                            fig1 = go.Figure(data=[go.Pie(
-                                labels=dist_labels,
-                                values=dist_values,
-                                hole=0.3,
-                                marker=dict(colors=px.colors.qualitative.Set2)
-                            )])
-                            fig1.update_layout(title="Composition Distillat", height=400)
-                            st.plotly_chart(fig1, use_container_width=True)
-
-                        with col2:
-                            # Pie chart résidu
-                            bott_values = [d['bottoms'] for d in r['distribution']]
-                            bott_labels = [d['compound'] for d in r['distribution']]
-
-                            fig2 = go.Figure(data=[go.Pie(
-                                labels=bott_labels,
-                                values=bott_values,
-                                hole=0.3,
-                                marker=dict(colors=px.colors.qualitative.Set3)
-                            )])
-                            fig2.update_layout(title="Composition Résidu", height=400)
-                            st.plotly_chart(fig2, use_container_width=True)
-
-                    # TAB 2: Distribution
-                    with tabs[1]:
-                        compounds_names = [d['compound'] for d in r['distribution']]
-                        feed_values = [d['feed'] for d in r['distribution']]
-                        dist_values = [d['distillate'] for d in r['distribution']]
-                        bott_values = [d['bottoms'] for d in r['distribution']]
-
-                        fig = go.Figure(data=[
-                            go.Bar(name='Alimentation', x=compounds_names, y=feed_values, marker_color='#667eea'),
-                            go.Bar(name='Distillat', x=compounds_names, y=dist_values, marker_color='#764ba2'),
-                            go.Bar(name='Résidu', x=compounds_names, y=bott_values, marker_color='#f093fb')
-                        ])
-                        fig.update_layout(
-                            barmode='group',
-                            title="Distribution des Composés",
-                            xaxis_title="Composé",
-                            yaxis_title="Débit (kmol/h)",
-                            height=500
-                        )
-                        st.plotly_chart(fig, use_container_width=True)
-
-                    # TAB 3: Bilans
-                    with tabs[2]:
-                        df = pd.DataFrame(r['distribution'])
-                        df['feed'] = df['feed'].round(3)
-                        df['distillate'] = df['distillate'].round(3)
-                        df['bottoms'] = df['bottoms'].round(3)
-                        df['recovery_D'] = df['recovery_D'].round(2)
-                        df['recovery_B'] = df['recovery_B'].round(2)
-
-                        st.dataframe(df, use_container_width=True)
-
-                        st.info(f"Bilan matière: Alim = {r['flows']['feed']:.2f} | "
-                               f"Dist = {r['flows']['distillate']:.2f} | "
-                               f"Résidu = {r['flows']['bottoms']:.2f} kmol/h")
-
-                    # TAB 4: Détails
-                    with tabs[3]:
-                        col1, col2 = st.columns(2)
-
-                        with col1:
-                            st.subheader("Fenske")
-                            st.write(f"- N_min = {r['fenske']['N_min']:.3f} plateaux")
-                            st.write(f"- α_avg = {r['fenske']['alpha_avg']:.3f}")
-
-                            st.subheader("Underwood")
-                            st.write(f"- R_min = {r['underwood']['R_min']:.3f}")
-                            st.write(f"- θ = {r['underwood']['theta']:.3f}")
-
-                            st.subheader("Températures")
-                            st.write(f"- T_tête = {r['temperatures']['top']:.1f}°C")
-                            st.write(f"- T_fond = {r['temperatures']['bottom']:.1f}°C")
-
-                        with col2:
-                            st.subheader("Gilliland")
-                            st.write(f"- R_op = {r['gilliland']['R_operating']:.3f}")
-                            st.write(f"- N_théorique = {r['gilliland']['N_theoretical']:.2f}")
-                            st.write(f"- N_réel = {r['gilliland']['N_real']}")
-
-                            st.subheader("Kirkbride")
-                            st.write(f"- Plateau alim = {r['kirkbride']['feed_stage']}")
-                            st.write(f"- N_rect = {r['kirkbride']['N_rectification']}")
-                            st.write(f"- N_strip = {r['kirkbride']['N_stripping']}")
-
-                            st.subheader("Énergie")
-                            st.write(f"- Q_cond = {r['energy']['Q_condenser']:.0f} kW")
-                            st.write(f"- Q_reb = {r['energy']['Q_reboiler']:.0f} kW")
-
-                    # TAB 5: Économie
-                    with tabs[4]:
-                        # Créer l'optimiseur
-                        def simulate_func(R_test):
-                            return simulate_shortcut(
-                                selected_compounds,
-                                [c / 100 for c in compositions],
-                                feed_rate, pressure, light_recovery, heavy_recovery,
-                                feed_condition, R_test / r['underwood']['R_min'], efficiency
-                            )
-
-                        optimizer = EconomicOptimizer(simulate_func)
-
-                        # Calculer le TAC actuel
-                        tac_result = optimizer.calculate_TAC(
-                            r['gilliland']['N_real'],
-                            r['gilliland']['R_operating'],
-                            r['energy']['Q_condenser'],
-                            r['energy']['Q_reboiler']
-                        )
-
-                        # Afficher TAC
-                        st.subheader("Total Annualized Cost (TAC)")
-
-                        cols = st.columns(4)
-                        cols[0].metric("TAC Total", f"{tac_result['TAC']/1000:.1f} k€/an")
-                        cols[1].metric("Capital", f"{tac_result['annualized_capital']/1000:.1f} k€/an")
-                        cols[2].metric("Exploitation", f"{tac_result['operating']['total']/1000:.1f} k€/an")
-                        cols[3].metric("Maintenance", f"{tac_result['maintenance']/1000:.1f} k€/an")
-
-                        st.divider()
-
-                        # Breakdown
-                        col1, col2 = st.columns(2)
-
-                        with col1:
-                            st.subheader("Répartition des Coûts")
-                            fig = go.Figure(data=[go.Pie(
-                                labels=['Capital', 'Exploitation', 'Maintenance'],
-                                values=[
-                                    tac_result['annualized_capital'],
-                                    tac_result['operating']['total'],
-                                    tac_result['maintenance']
-                                ],
-                                hole=0.4
-                            )])
-                            fig.update_layout(height=400)
-                            st.plotly_chart(fig, use_container_width=True)
-
-                        with col2:
-                            st.subheader("Détails")
-                            st.write("**Coûts d'Investissement:**")
-                            st.write(f"- Colonne: {tac_result['capital']['column']/1000:.1f} k€")
-                            st.write(f"- Condenseur: {tac_result['capital']['condenser']/1000:.1f} k€")
-                            st.write(f"- Rebouilleur: {tac_result['capital']['reboiler']/1000:.1f} k€")
-                            st.write(f"**Total: {tac_result['capital']['total']/1000:.1f} k€**")
-
-                            st.write("\n**Coûts d'Exploitation:**")
-                            st.write(f"- Énergie: {tac_result['operating']['energy']/1000:.1f} k€/an")
-                            st.write(f"- Refroidissement: {tac_result['operating']['cooling']/1000:.1f} k€/an")
+                # Paramètres depuis shortcut si disponible
+                if calculation_method == 'Comparaison' and results_shortcut['success']:
+                    N_stages = results_shortcut['results']['gilliland']['N_real']
+                    feed_stage = results_shortcut['results']['kirkbride']['feed_stage']
+                    R_min = results_shortcut['results']['underwood']['R_min']
                 else:
-                    st.error(f"Erreur: {results_shortcut['error']}")
+                    N_stages = 20
+                    feed_stage = 10
+                    R_min = 1.5
 
-            # Affichage pour MESH Rigoureux
-            elif calculation_method == 'MESH Rigoureux':
-                if results_mesh['success']:
-                    st.success("Convergence MESH atteinte!")
+                R = R_min * reflux_multiplier
+                D = feed_rate * z_F[0] * light_recovery / light_recovery
 
-                    # Afficher les métriques principales
-                    cols = st.columns(4)
-                    cols[0].metric("Itérations", results_mesh['iterations'])
-                    cols[1].metric("Statut", "Convergé ✓")
-                    cols[2].metric("N plateaux", results_mesh['n_stages'])
-                    cols[3].metric("Reflux", f"{results_mesh['R']:.3f}")
+                # Créer le solver MESH
+                mesh_solver = MESHSolver(
+                    compound_objects,
+                    N_stages,
+                    feed_stage,
+                    pressure
+                )
+
+                # Choisir le modèle d'activité
+                if thermo_model == 'Wilson':
+                    activity_model = WilsonModel(compound_objects)
+                elif thermo_model == 'NRTL':
+                    activity_model = NRTLModel(compound_objects)
+                elif thermo_model == 'UNIQUAC':
+                    activity_model = UNIQUACModel(compound_objects)
+                else:
+                    activity_model = IdealModel(compound_objects)
+
+                mesh_solver.activity_model = activity_model
+
+                # Résoudre
+                mesh_raw = mesh_solver.solve(feed_rate, z_F, R, D, max_iter=100, verbose=False)
+
+                # Reformater les résultats pour l'affichage
+                if mesh_raw['converged']:
+                    results_mesh = {
+                        'success': True,
+                        'method': 'MESH',
+                        'converged': True,
+                        'iterations': mesh_raw['iterations'],
+                        'n_stages': N_stages,
+                        'feed_stage': feed_stage,
+                        'R': R,
+                        'D': mesh_raw['distillate']['flow'],
+                        'B': mesh_raw['bottoms']['flow'],
+                        'T': mesh_raw['temperatures'],
+                        'x': mesh_raw['compositions']['liquid'],
+                        'y': mesh_raw['compositions']['vapor'],
+                        'L': mesh_raw['flows']['liquid'],
+                        'V': mesh_raw['flows']['vapor']
+                    }
+                else:
+                    results_mesh = {
+                        'success': False,
+                        'converged': False,
+                        'error': "MESH n'a pas convergé après {} itérations".format(mesh_raw['iterations'])
+                    }
+
+            except Exception as e:
+                results_mesh = {'success': False, 'converged': False, 'error': str(e)}
+
+        # Affichage des résultats
+        st.success("✅ Simulation terminée!")
+
+        # Tabs pour différentes vues
+        if calculation_method == 'Méthodes Simplifiées':
+            tabs = st.tabs([
+                "📊 Vue d'ensemble",
+                "📈 Distribution",
+                "📋 Bilans",
+                "🔬 Détails",
+                "💰 Économie"
+            ])
+
+            if results_shortcut['success']:
+                r = results_shortcut['results']
+
+                # TAB 1: Vue d'ensemble
+                with tabs[0]:
+                    # KPIs
+                    cols = st.columns(5)
+                    cols[0].metric("N min (Fenske)", f"{r['fenske']['N_min']:.2f}")
+                    cols[1].metric("N réel", r['gilliland']['N_real'])
+                    cols[2].metric("R min", f"{r['underwood']['R_min']:.3f}")
+                    cols[3].metric("R opératoire", f"{r['gilliland']['R_operating']:.3f}")
+                    cols[4].metric("Plateau alim.", r['kirkbride']['feed_stage'])
 
                     st.divider()
 
-                    # Tabs pour les résultats MESH
-                    tabs_mesh = st.tabs([
-                        "Profils de Composition",
-                        "Profils de Température",
-                        "Débits",
-                        "Bilans"
+                    # Graphiques
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+                        # Pie chart distillat
+                        dist_values = [d['distillate'] for d in r['distribution']]
+                        dist_labels = [d['compound'] for d in r['distribution']]
+
+                        fig1 = go.Figure(data=[go.Pie(
+                            labels=dist_labels,
+                            values=dist_values,
+                            hole=0.3,
+                            marker=dict(colors=px.colors.qualitative.Set2)
+                        )])
+                        fig1.update_layout(title="Composition Distillat", height=400)
+                        st.plotly_chart(fig1, use_container_width=True)
+
+                    with col2:
+                        # Pie chart résidu
+                        bott_values = [d['bottoms'] for d in r['distribution']]
+                        bott_labels = [d['compound'] for d in r['distribution']]
+
+                        fig2 = go.Figure(data=[go.Pie(
+                            labels=bott_labels,
+                            values=bott_values,
+                            hole=0.3,
+                            marker=dict(colors=px.colors.qualitative.Set3)
+                        )])
+                        fig2.update_layout(title="Composition Résidu", height=400)
+                        st.plotly_chart(fig2, use_container_width=True)
+
+                # TAB 2: Distribution
+                with tabs[1]:
+                    compounds_names = [d['compound'] for d in r['distribution']]
+                    feed_values = [d['feed'] for d in r['distribution']]
+                    dist_values = [d['distillate'] for d in r['distribution']]
+                    bott_values = [d['bottoms'] for d in r['distribution']]
+
+                    fig = go.Figure(data=[
+                        go.Bar(name='Alimentation', x=compounds_names, y=feed_values, marker_color='#667eea'),
+                        go.Bar(name='Distillat', x=compounds_names, y=dist_values, marker_color='#764ba2'),
+                        go.Bar(name='Résidu', x=compounds_names, y=bott_values, marker_color='#f093fb')
                     ])
+                    fig.update_layout(
+                        barmode='group',
+                        title="Distribution des Composés",
+                        xaxis_title="Composé",
+                        yaxis_title="Débit (kmol/h)",
+                        height=500
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
 
-                    with tabs_mesh[0]:
-                        st.subheader("Profils de Composition Liquide")
+                # TAB 3: Bilans
+                with tabs[2]:
+                    df = pd.DataFrame(r['distribution'])
+                    df['feed'] = df['feed'].round(3)
+                    df['distillate'] = df['distillate'].round(3)
+                    df['bottoms'] = df['bottoms'].round(3)
+                    df['recovery_D'] = df['recovery_D'].round(2)
+                    df['recovery_B'] = df['recovery_B'].round(2)
 
-                        # Créer le graphique des profils
-                        fig = go.Figure()
+                    st.dataframe(df, use_container_width=True)
 
-                        for i, comp_name in enumerate(selected_compounds):
-                            comp_display = COMPOUNDS_LIBRARY[comp_name]['name']
-                            x_profile = [results_mesh['x'][stage][i] for stage in range(results_mesh['n_stages'])]
+                    st.info(f"✅ Bilan matière: Alim = {r['flows']['feed']:.2f} | "
+                           f"Dist = {r['flows']['distillate']:.2f} | "
+                           f"Résidu = {r['flows']['bottoms']:.2f} kmol/h")
 
-                            fig.add_trace(go.Scatter(
-                                x=list(range(1, results_mesh['n_stages'] + 1)),
-                                y=x_profile,
-                                mode='lines+markers',
-                                name=comp_display,
-                                line=dict(width=2),
-                                marker=dict(size=6)
-                            ))
+                # TAB 4: Détails
+                with tabs[3]:
+                    col1, col2 = st.columns(2)
 
-                        fig.update_layout(
-                            title="Profils de Composition Liquide par Plateau",
-                            xaxis_title="Numéro de Plateau",
-                            yaxis_title="Fraction Molaire Liquide",
-                            height=500,
-                            hovermode='x unified'
+                    with col1:
+                        st.subheader("🔬 Fenske")
+                        st.write(f"- N_min = {r['fenske']['N_min']:.3f} plateaux")
+                        st.write(f"- α_avg = {r['fenske']['alpha_avg']:.3f}")
+
+                        st.subheader("🔬 Underwood")
+                        st.write(f"- R_min = {r['underwood']['R_min']:.3f}")
+                        st.write(f"- θ = {r['underwood']['theta']:.3f}")
+
+                        st.subheader("🌡️ Températures")
+                        st.write(f"- T_tête = {r['temperatures']['top']:.1f}°C")
+                        st.write(f"- T_fond = {r['temperatures']['bottom']:.1f}°C")
+
+                    with col2:
+                        st.subheader("🔬 Gilliland")
+                        st.write(f"- R_op = {r['gilliland']['R_operating']:.3f}")
+                        st.write(f"- N_théorique = {r['gilliland']['N_theoretical']:.2f}")
+                        st.write(f"- N_réel = {r['gilliland']['N_real']}")
+
+                        st.subheader("🔬 Kirkbride")
+                        st.write(f"- Plateau alim = {r['kirkbride']['feed_stage']}")
+                        st.write(f"- N_rect = {r['kirkbride']['N_rectification']}")
+                        st.write(f"- N_strip = {r['kirkbride']['N_stripping']}")
+
+                        st.subheader("⚡ Énergie")
+                        st.write(f"- Q_cond = {r['energy']['Q_condenser']:.0f} kW")
+                        st.write(f"- Q_reb = {r['energy']['Q_reboiler']:.0f} kW")
+
+                # TAB 5: Économie
+                with tabs[4]:
+                    # Créer l'optimiseur
+                    def simulate_func(R_test):
+                        return simulate_shortcut(
+                            selected_compounds,
+                            [c / 100 for c in compositions],
+                            feed_rate, pressure, light_recovery, heavy_key_recovery,
+                            feed_condition, R_test / r['underwood']['R_min'], efficiency
                         )
+
+                    optimizer = EconomicOptimizer(simulate_func)
+
+                    # Calculer le TAC actuel
+                    tac_result = optimizer.calculate_TAC(
+                        r['gilliland']['N_real'],
+                        r['gilliland']['R_operating'],
+                        r['energy']['Q_condenser'],
+                        r['energy']['Q_reboiler']
+                    )
+
+                    # Afficher TAC
+                    st.subheader("💰 Total Annualized Cost (TAC)")
+
+                    cols = st.columns(4)
+                    cols[0].metric("TAC Total", f"{tac_result['TAC']/1000:.1f} k€/an")
+                    cols[1].metric("Capital", f"{tac_result['annualized_capital']/1000:.1f} k€/an")
+                    cols[2].metric("Exploitation", f"{tac_result['operating']['total']/1000:.1f} k€/an")
+                    cols[3].metric("Maintenance", f"{tac_result['maintenance']/1000:.1f} k€/an")
+
+                    st.divider()
+
+                    # Breakdown
+                    col1, col2 = st.columns(2)
+
+                    with col1:
+                        st.subheader("📊 Répartition des Coûts")
+                        fig = go.Figure(data=[go.Pie(
+                            labels=['Capital', 'Exploitation', 'Maintenance'],
+                            values=[
+                                tac_result['annualized_capital'],
+                                tac_result['operating']['total'],
+                                tac_result['maintenance']
+                            ],
+                            hole=0.4
+                        )])
+                        fig.update_layout(height=400)
                         st.plotly_chart(fig, use_container_width=True)
 
-                        st.info(f"Alimentation au plateau {results_mesh['feed_stage']}")
+                    with col2:
+                        st.subheader("💵 Détails")
+                        st.write("**Coûts d'Investissement:**")
+                        st.write(f"- Colonne: {tac_result['capital']['column']/1000:.1f} k€")
+                        st.write(f"- Condenseur: {tac_result['capital']['condenser']/1000:.1f} k€")
+                        st.write(f"- Rebouilleur: {tac_result['capital']['reboiler']/1000:.1f} k€")
+                        st.write(f"**Total: {tac_result['capital']['total']/1000:.1f} k€**")
 
-                    with tabs_mesh[1]:
-                        st.subheader("Profils de Température")
+                        st.write("\n**Coûts d'Exploitation:**")
+                        st.write(f"- Énergie: {tac_result['operating']['energy']/1000:.1f} k€/an")
+                        st.write(f"- Refroidissement: {tac_result['operating']['cooling']/1000:.1f} k€/an")
+            else:
+                st.error(f"❌ Erreur: {results_shortcut['error']}")
+
+        # Affichage pour MESH Rigoureux
+        elif calculation_method == 'MESH Rigoureux':
+            if results_mesh['success']:
+                st.success("✅ Convergence MESH atteinte!")
+
+                # Afficher les métriques principales
+                cols = st.columns(4)
+                cols[0].metric("Itérations", results_mesh['iterations'])
+                cols[1].metric("Statut", "Convergé ✓")
+                cols[2].metric("N plateaux", results_mesh['n_stages'])
+                cols[3].metric("Reflux", f"{results_mesh['R']:.3f}")
+
+                st.divider()
+
+                # Tabs pour les résultats MESH
+                tabs_mesh = st.tabs([
+                    "📊 Profils de Composition",
+                    "🌡️ Profils de Température",
+                    "💧 Débits",
+                    "📋 Bilans"
+                ])
+
+                with tabs_mesh[0]:
+                    st.subheader("📊 Profils de Composition Liquide")
+
+                    # Créer le graphique des profils
+                    fig = go.Figure()
+
+                    for i, comp_name in enumerate(selected_compounds):
+                        comp_display = COMPOUNDS_LIBRARY[comp_name]['name']
+                        x_profile = [results_mesh['x'][stage][i] for stage in range(results_mesh['n_stages'])]
+
+                        fig.add_trace(go.Scatter(
+                            x=list(range(1, results_mesh['n_stages'] + 1)),
+                            y=x_profile,
+                            mode='lines+markers',
+                            name=comp_display,
+                            line=dict(width=2),
+                            marker=dict(size=6)
+                        ))
+
+                    fig.update_layout(
+                        title="Profils de Composition Liquide par Plateau",
+                        xaxis_title="Numéro de Plateau",
+                        yaxis_title="Fraction Molaire Liquide",
+                        height=500,
+                        hovermode='x unified'
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
+
+                    st.info(f"📍 Alimentation au plateau {results_mesh['feed_stage']}")
+
+                with tabs_mesh[1]:
+                    st.subheader("🌡️ Profils de Température")
 
                     # Convertir températures en Celsius
                     T_celsius = [T - 273.15 for T in results_mesh['T']]
@@ -1935,146 +1687,5 @@ TAC = C_capital × CRF + C_operating + C_maintenance
         - Filière PIC - UH1 - 2024-2025
         """)
 
-# =============================================================================
-# DOCUMENTATION PAGE
-# =============================================================================
-
-elif st.session_state.current_page == 'Documentation':
-    st.markdown("## Documentation")
-    
-    # Theory Section
-    st.markdown("""
-    <div class='info-card'>
-        <h3 style='margin-top: 0;'>Théorie et Méthodes</h3>
-        <p style='color: #666; line-height: 1.6;'>
-            Cette application implémente les principales méthodes de calcul pour la distillation multicomposants,
-            telles qu'enseignées dans le cours de Modélisation et Simulation des Procédés.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Methods Details
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.markdown("### Méthodes Simplifiées")
-        st.markdown("""
-        **Équation de Fenske** (Nombre minimum de plateaux)
-        ```
-        N_min = log[(x_LK,D / x_HK,D) / (x_LK,B / x_HK,B)] / log(α_avg)
-        ```
-        
-        **Équation d'Underwood** (Reflux minimum)
-        ```
-        Σ [α_i × z_i / (α_i - θ)] = 1 - q
-        R_min + 1 = Σ [α_i × x_D,i / (α_i - θ)]
-        ```
-        
-        **Corrélation de Gilliland** (Nombre de plateaux réels)
-        ```
-        X = (R - R_min) / (R + 1)
-        Y = f(X)  [corrélation empirique]
-        N = N_min + Y / (1 - Y)
-        ```
-        
-        **Équation de Kirkbride** (Position d'alimentation)
-        ```
-        log(N_R / N_S) = 0.206 × log[...]
-        ```
-        """)
-    
-    with col2:
-        st.markdown("### Méthode MESH")
-        st.markdown("""
-        **Équations MESH** (résolution simultanée)
-        
-        **M** - Material Balance (Bilan matière):
-        ```
-        L_j × x_i,j + V_j × y_i,j = L_j-1 × x_i,j-1 + V_j+1 × y_i,j+1 + F_j × z_i,j
-        ```
-        
-        **E** - Equilibrium (Équilibre):
-        ```
-        y_i,j = K_i,j × x_i,j
-        K_i,j = (γ_i × P_i^sat) / P
-        ```
-        
-        **S** - Summation (Somme):
-        ```
-        Σ x_i,j = 1
-        Σ y_i,j = 1
-        ```
-        
-        **H** - Heat Balance (Bilan thermique):
-        ```
-        L_j × h_L,j + V_j × h_V,j = L_j-1 × h_L,j-1 + V_j+1 × h_V,j+1 + F_j × h_F,j + Q_j
-        ```
-        """)
-    
-    # Example Section
-    st.markdown("---")
-    st.markdown("### Exemple d'Application")
-    
-    st.markdown("""
-    <div class='info-card'>
-        <h4>Séparation Benzène / Toluène / o-Xylène</h4>
-        
-        **Données:**
-        - Alimentation: 100 kmol/h (33.3% / 33.3% / 33.4%)
-        - Pression: 101325 Pa
-        - Récupérations: 95% pour chaque clé
-        - Reflux: 1.3 × R_min
-        
-        **Résultats attendus:**
-        ```
-        N min (Fenske) ≈ 6.8 plateaux
-        R min (Underwood) ≈ 1.85
-        R opératoire ≈ 2.41
-        N théorique ≈ 14 plateaux
-        N réel ≈ 19 plateaux
-        Plateau alimentation ≈ 10
-
-        T tête ≈ 80.1°C (Tb benzène)
-        T fond ≈ 144.4°C (Tb o-xylène)
-        ```
-
-        **Interprétation:**
-        - Colonne de ~19 plateaux nécessaire
-        - Alimenter au 10ème plateau (milieu)
-        - Reflux 1.3× le minimum (bon compromis)
-        - Gradient de température ~64°C
-    </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown("---")
-
-    st.markdown("### Ressources")
-
-    st.markdown("""
-    <div class='info-card'>
-        <h4>Documentation Complète</h4>
-        <ul style='color: #666; line-height: 1.8;'>
-            <li><strong>README_COMPLET.md</strong> - Guide exhaustif</li>
-            <li><strong>STREAMLIT_GUIDE.md</strong> - Guide Streamlit</li>
-            <li><strong>IMPLEMENTATION_COMPLETE.md</strong> - Détails techniques</li>
-        </ul>
-        
-        <h4 style='margin-top: 20px;'>Code Source</h4>
-        <ul style='color: #666; line-height: 1.8;'>
-            <li><strong>mesh_solver.py</strong> - Solveur MESH rigoureux</li>
-            <li><strong>activity_models.py</strong> - Modèles thermodynamiques</li>
-            <li><strong>economic_optimization.py</strong> - Optimisation TAC</li>
-        </ul>
-        
-        <h4 style='margin-top: 20px;'>Cours</h4>
-        <p style='color: #666; line-height: 1.6;'>
-            Prof. BAKHER Zine Elabidine<br>
-            Modélisation et Simulation des Procédés<br>
-            Filière PIC - UH1 - 2024-2025
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
-
-# Show message when no page is active
-else:
-    st.info("Sélectionnez une page dans le menu de navigation ci-dessus pour commencer")
+    st.divider()
+    st.info("👈 Configurez les paramètres dans la barre latérale et lancez la simulation pour voir les résultats")

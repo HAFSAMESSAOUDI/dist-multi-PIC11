@@ -12,39 +12,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.optimize import fsolve, brentq, minimize
 from scipy.linalg import solve_banded
-
-# Import thermo with error handling
-try:
-    from thermo.chemical import Chemical
-    from thermo import ChemicalConstantsPackage, PRMIX, CEOSLiquid, CEOSGas
-    THERMO_AVAILABLE = True
-except ImportError as e:
-    print(f"⚠️ Warning: thermo package not available: {e}")
-    print("Installing thermo package...")
-    import subprocess
-    import sys
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "thermo==0.2.20"])
-        from thermo.chemical import Chemical
-        from thermo import ChemicalConstantsPackage, PRMIX, CEOSLiquid, CEOSGas
-        THERMO_AVAILABLE = True
-        print("✅ thermo package installed successfully")
-    except Exception as install_error:
-        print(f"❌ Failed to install thermo: {install_error}")
-        THERMO_AVAILABLE = False
-        # Create dummy classes for fallback
-        class Chemical:
-            def __init__(self, *args, **kwargs):
-                raise ImportError("thermo package not available")
-        class ChemicalConstantsPackage:
-            pass
-        class PRMIX:
-            pass
-        class CEOSLiquid:
-            pass
-        class CEOSGas:
-            pass
-
+from thermo.chemical import Chemical
+from thermo import ChemicalConstantsPackage, PRMIX, CEOSLiquid, CEOSGas
 import warnings
 warnings.filterwarnings('ignore')
 
