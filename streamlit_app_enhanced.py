@@ -953,11 +953,11 @@ elif st.session_state.current_page == 'simulation':
                 simulation_data = {
                     'parameters': {
                         'compounds': [{'name': c, 'fraction': z} for c, z in zip(selected_compounds, compositions)],
-                        'feed_flow': feed_flow,
+                        'feed_flow': feed_rate,
                         'pressure': pressure,
-                        'recovery_light': recovery_light,
-                        'recovery_heavy': recovery_heavy,
-                        'q': q_value,
+                        'recovery_light': light_recovery,
+                        'recovery_heavy': heavy_recovery,
+                        'q': feed_condition,
                         'reflux_mult': reflux_multiplier,
                         'efficiency': efficiency
                     },
@@ -1321,11 +1321,11 @@ elif st.session_state.current_page == 'simulation':
                 mesh_simulation_data = {
                     'parameters': {
                         'compounds': [{'name': c, 'fraction': z} for c, z in zip(selected_compounds, compositions)],
-                        'feed_flow': feed_flow,
+                        'feed_flow': feed_rate,
                         'pressure': pressure,
-                        'recovery_light': recovery_light,
-                        'recovery_heavy': recovery_heavy,
-                        'q': q_value,
+                        'recovery_light': light_recovery,
+                        'recovery_heavy': heavy_recovery,
+                        'q': feed_condition,
                         'reflux_mult': reflux_multiplier,
                         'efficiency': efficiency
                     },
