@@ -193,10 +193,10 @@ def simulate_shortcut(compounds, compositions, feed_rate, pressure,
 
         # K-values moyens
         T_avg = sum([c.Tb for c in compound_objects]) / len(compound_objects)
-        K_values = thermo.calculate_K_values(T_avg, pressure)
+        K_values = thermo.K_values(T_avg, pressure)
 
         # Volatilités relatives
-        alpha = thermo.calculate_relative_volatilities(T_avg, pressure)
+        alpha = thermo.relative_volatilities(T_avg, pressure)
 
         # Fenske - N_min
         LK_idx, HK_idx = 0, len(compound_objects) - 1
