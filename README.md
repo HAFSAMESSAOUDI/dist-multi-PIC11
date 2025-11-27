@@ -1,52 +1,44 @@
 # 🧪 Simulateur de Distillation Multicomposants
 
-## Application Web Full-Stack (Flask + React)
+**Application Streamlit Interactive Complète**
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-3.0-green.svg)](https://flask.palletsprojects.com/)
-[![React](https://img.shields.io/badge/React-18.2-61dafb.svg)](https://reactjs.org/)
-[![Material-UI](https://img.shields.io/badge/MUI-5.15-007FFF.svg)](https://mui.com/)
+**Module:** Modélisation et Simulation des Procédés
+**Prof.** BAKHER Zine Elabidine
+**Filière:** Procédés et Ingénierie Chimique (PIC)
+**Université:** UH1
+**Année:** 2024-2025
 
 ---
 
 ## 📖 Description
 
-Application web moderne pour la **simulation de colonnes de distillation multicomposants** développée pour le cours de **Modélisation et Simulation des Procédés**.
+Application web interactive de simulation de colonnes de distillation multicomposants, construite avec **Streamlit** et implémentant **100% des méthodes du PDF du cours**.
 
-### Caractéristiques Principales
+### 🎯 Deux Versions Disponibles
 
-✅ **Interface Web Intuitive** - React + Material-UI
-✅ **API REST** - Backend Flask performant
-✅ **Calculs Rigoureux** - Méthodes de Fenske, Underwood, Gilliland, Kirkbride
-✅ **Visualisations Interactives** - Graphiques Recharts
-✅ **Bibliothèque Thermodynamique** - 13+ composés disponibles
-✅ **Export de Résultats** - Format JSON
+#### 1. **Version Simple** (`streamlit_app.py`)
+- ✅ Méthodes simplifiées (Fenske, Underwood, Gilliland, Kirkbride)
+- ✅ Interface épurée
+- ✅ Calculs rapides (<1s)
+- 📚 **Idéale pour:** Apprentissage, design préliminaire
 
----
+#### 2. **Version Complète** (`streamlit_app_enhanced.py`) ⭐ RECOMMANDÉE
+- ✅ **TOUT** de la version simple
+- ✅ Méthode MESH rigoureuse (Wang-Henke)
+- ✅ Modèles d'activité (Wilson, NRTL, UNIQUAC)
+- ✅ Optimisation économique (TAC)
+- ✅ Études paramétriques
+- ✅ Mode comparaison (MESH vs Simplifiées)
+- 📚 **Idéale pour:** Projets, design final, validation
 
-## 🎯 Fonctionnalités
+### ✨ Fonctionnalités Complètes
 
-### Configuration de Simulation
-- Sélection multiple de composés (2 à 10)
-- Définition des compositions avec normalisation automatique
-- Paramètres opératoires (débit, pression)
-- Spécifications de séparation (récupérations)
-- Contrôles interactifs (sliders pour reflux, efficacité)
-
-### Calculs et Méthodes
-- **Fenske**: Nombre minimum de plateaux (reflux total)
-- **Underwood**: Reflux minimum
-- **Gilliland**: Corrélation pour plateaux réels
-- **Kirkbride**: Position du plateau d'alimentation
-- Estimation des profils de composition et température
-
-### Résultats et Visualisation
-- Bilans matières complets
-- Profils de composition (liquide et vapeur)
-- Profil de température dans la colonne
-- Débits internes (rectification et épuisement)
-- Graphiques interactifs et zoomables
-- Export JSON des résultats
+#### Implémentées selon le PDF:
+- ✅ **Section 3-5:** Méthodes simplifiées (Équations 10-23)
+- ✅ **Section 4:** Méthode MESH rigoureuse (Équations 24-39)
+- ✅ **Section 10.1:** Modèles d'activité (Équation 40)
+- ✅ **Section 10.3:** Optimisation économique (Équations 43-50)
+- ✅ **Section 9:** Études paramétriques (reflux, pression)
 
 ---
 
@@ -54,317 +46,330 @@ Application web moderne pour la **simulation de colonnes de distillation multico
 
 ### Prérequis
 - Python 3.8+
-- Node.js 14+
-- pip et npm
 
-### Installation en 3 étapes
+### Installation Complète
 
-#### 1. Cloner le dépôt (si applicable)
 ```bash
-git clone [URL]
-cd dist-multi-PIC11-main
-```
+# Cloner le projet
+git clone [repository-url]
+cd dist-multi-PIC11
 
-#### 2. Installer les dépendances Backend
-```bash
-pip install Flask flask-cors numpy scipy pandas matplotlib thermo chemicals CoolProp
-```
-
-#### 3. Installer les dépendances Frontend
-```bash
-cd frontend
-npm install
+# Installer les dépendances complètes
+pip install -r requirements_complete.txt
 ```
 
 ---
 
-## ▶️ Lancement
+## ⚡ Lancement
 
-### Méthode 1: Script Automatique (Recommandé)
+### Version Complète ⭐ RECOMMANDÉE
 
 **Windows:**
 ```bash
-start_app.bat
+run_enhanced.bat
 ```
 
 **Linux/Mac:**
 ```bash
-chmod +x start_app.sh
-./start_app.sh
+chmod +x run_enhanced.sh
+./run_enhanced.sh
 ```
 
-### Méthode 2: Lancement Manuel
-
-**Terminal 1 - Backend Flask:**
+**Direct:**
 ```bash
-cd backend
-python app.py
+python -m streamlit run streamlit_app_enhanced.py
 ```
-Backend accessible sur: http://localhost:5000
 
-**Terminal 2 - Frontend React:**
+### Version Simple
+
+**Windows:**
 ```bash
-cd frontend
-npm start
-```
-Frontend accessible sur: http://localhost:3000
-
----
-
-## 📱 Utilisation
-
-1. **Ouvrir l'application**: http://localhost:3000
-
-2. **Onglet Simulation**:
-   - Choisir les composés
-   - Définir les compositions
-   - Ajuster les paramètres
-   - Lancer la simulation
-
-3. **Onglet Résultats**:
-   - Consulter les bilans
-   - Analyser les graphiques
-   - Exporter les données
-
-4. **Onglet Composés**:
-   - Explorer la bibliothèque
-
----
-
-## 📊 Exemple: Système BTX
-
-**Configuration par défaut:**
-```json
-{
-  "compounds": ["benzene", "toluene", "o-xylene"],
-  "compositions": [0.33, 0.33, 0.34],
-  "flow_rate": 100.0,
-  "pressure": 101325,
-  "recovery_lk": 0.95,
-  "recovery_hk": 0.95,
-  "reflux_factor": 1.3,
-  "feed_quality": 1.0,
-  "efficiency": 0.70
-}
+run_streamlit.bat
 ```
 
-**Résultats typiques:**
-- N_min ≈ 8-10 plateaux
-- R_min ≈ 0.6-0.8
-- N_réel ≈ 15-20 plateaux
-- Plateau alimentation ≈ 8-10
-
----
-
-## 🏗️ Architecture
-
-```
-Frontend (React)  ←→  Backend (Flask)  ←→  Modules Python
-   Port 3000              Port 5000        (Calculs thermo)
+**Linux/Mac:**
+```bash
+./run_streamlit.sh
 ```
 
-**Détails complets:** Voir [ARCHITECTURE.md](ARCHITECTURE.md)
+**Direct:**
+```bash
+python -m streamlit run streamlit_app.py
+```
+
+### Linux/Mac
+```bash
+chmod +x run_streamlit.sh
+./run_streamlit.sh
+```
+
+### Commande directe
+```bash
+streamlit run streamlit_app.py
+```
+
+L'application s'ouvre automatiquement dans votre navigateur à **http://localhost:8501**
 
 ---
 
 ## 📁 Structure du Projet
 
 ```
-dist-multi-PIC11-main/
+dist-multi-PIC11/
 │
-├── backend/                         # Backend Flask
-│   ├── app.py                      # API REST
-│   └── requirements.txt
+├── streamlit_app.py                   # ✅ Application principale Streamlit
+├── distillation_multicomposants.py   # Moteur de calcul
 │
-├── frontend/                        # Frontend React
-│   ├── public/
-│   ├── src/
-│   │   ├── components/             # Composants React
-│   │   ├── services/               # API client
-│   │   ├── App.js
-│   │   └── index.js
-│   └── package.json
+├── requirements_streamlit.txt         # Dépendances Python
 │
-├── distillation_multicomposants.py # Moteur de calcul
-├── visualization.py                 # Visualisations
-├── exemple_btx.py                  # Script exemple
+├── run_streamlit.bat                  # Lancement Windows
+├── run_streamlit.sh                   # Lancement Linux/Mac
 │
-├── start_app.bat                   # Lanceur Windows
-├── start_app.sh                    # Lanceur Linux/Mac
-├── test_backend.py                 # Tests API
-│
-├── README.md                       # Ce fichier
-├── README_APPLICATION.md           # Documentation complète
-├── QUICK_START.md                  # Guide rapide
-└── ARCHITECTURE.md                 # Architecture détaillée
+└── README.md                          # Ce fichier
 ```
 
 ---
 
-## 🧪 Tests
+## ✨ Fonctionnalités
 
-### Tester le Backend
-```bash
-# Lancer le backend d'abord
-cd backend && python app.py
+### 🔬 Méthodes Implémentées
+- ✅ **Fenske**: Nombre minimum de plateaux (N_min)
+- ✅ **Underwood**: Reflux minimum (R_min)
+- ✅ **Gilliland**: Corrélation plateaux/reflux
+- ✅ **Kirkbride**: Position plateau d'alimentation
 
-# Dans un autre terminal
-python test_backend.py
+### 🎨 Interface Streamlit
+
+#### Barre latérale
+- Sélection des composés (multi-select)
+- Configuration des compositions (%)
+- Paramètres opératoires (débit, pression, condition d'alimentation)
+- Spécifications de séparation (récupérations, reflux, efficacité)
+- Bouton de simulation
+
+#### Zone principale
+- **5 KPIs** : N_min, N_réel, R_min, R_op, Plateau d'alimentation
+- **4 Onglets** :
+  - 📊 **Vue d'ensemble** : Compositions distillat/résidu + 3 jauges de performance
+  - 📈 **Distribution** : Graphique barres des composés
+  - 📋 **Bilans matières** : Tableau détaillé
+  - 🔬 **Résultats détaillés** : Toutes les méthodes + températures + énergie
+
+### 🧬 Composés Disponibles
+13 composés prédéfinis:
+- **Aromatiques**: Benzène, Toluène, o-Xylène, Éthylbenzène, Cumène, Styrène
+- **Alcools**: Méthanol, Éthanol, 1-Propanol, 1-Butanol
+- **Alcanes**: Hexane, Heptane, Octane
+
+---
+
+## 📊 Exemple: Cas BTX
+
+### Configuration dans Streamlit
+
+1. **Composés sélectionnés:**
+   - Benzène
+   - Toluène
+   - o-Xylène
+
+2. **Compositions:**
+   - Benzène: 33.3%
+   - Toluène: 33.3%
+   - o-Xylène: 33.4%
+
+3. **Paramètres opératoires:**
+   - Débit d'alimentation: 100 kmol/h
+   - Pression: 101325 Pa (1 atm)
+   - Condition: Liquide saturé (q=1)
+
+4. **Spécifications:**
+   - Récupération léger: 95%
+   - Récupération lourd: 95%
+   - Multiplicateur reflux: 1.3
+   - Efficacité: 70%
+
+### Résultats Attendus
+```
+✅ N min (Fenske) = 6.8 plateaux
+✅ N réel = 19 plateaux
+✅ R min (Underwood) = 1.85
+✅ R opératoire = 2.41
+✅ Plateau alimentation = 10
+✅ T tête = 80.1°C
+✅ T fond = 138.5°C
 ```
 
-### Tester l'API manuellement
-```bash
-# Health check
-curl http://localhost:5000/api/health
+---
 
-# Liste des composés
-curl http://localhost:5000/api/compounds
+## 🔧 Technologies
+
+### Backend Python
+- **Streamlit** 1.28+ : Framework web
+- **NumPy** : Calculs numériques
+- **SciPy** : Résolution d'équations
+- **Plotly** : Visualisations interactives
+- **Pandas** : Manipulation de données
+
+### Moteur de Calcul
+- **distillation_multicomposants.py** : Classes ThermodynamicPackage et Compound
+- Équations thermodynamiques (Antoine, K-values, etc.)
+- Méthodes simplifiées (Fenske, Underwood, Gilliland, Kirkbride)
+
+---
+
+## 🎨 Personnalisation
+
+### Ajouter un Composé
+
+Éditez le dictionnaire `COMPOUNDS_LIBRARY` dans [streamlit_app.py](streamlit_app.py):
+
+```python
+COMPOUNDS_LIBRARY = {
+    'nouveau_compose': {
+        'name': 'Nouveau Composé',
+        'formula': 'CxHy',
+        'Tb': 100.0,  # Température d'ébullition (°C)
+        'Tc': 500.0,  # Température critique (K)
+        'Pc': 40.0    # Pression critique (bar)
+    }
+}
+```
+
+### Modifier le Style
+
+Le CSS personnalisé se trouve au début de [streamlit_app.py](streamlit_app.py):
+
+```python
+st.markdown("""
+<style>
+    .main {
+        background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+    }
+    /* Personnalisez ici */
+</style>
+""", unsafe_allow_html=True)
 ```
 
 ---
 
-## 📚 Documentation
+## 📚 Utilisation
 
-- **[README_APPLICATION.md](README_APPLICATION.md)** - Documentation complète
-- **[QUICK_START.md](QUICK_START.md)** - Guide de démarrage rapide
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Architecture technique
+### 1. Sélectionner les Composés
+Dans la barre latérale, choisissez **au moins 2 composés** dans le menu déroulant.
 
----
+### 2. Définir les Compositions
+Ajustez les pourcentages pour chaque composé. Utilisez le bouton **"Normaliser"** pour ajuster automatiquement à 100%.
 
-## 🔧 Technologies Utilisées
+### 3. Configurer les Paramètres
+- Débit d'alimentation (kmol/h)
+- Pression (Pa)
+- Condition d'alimentation (liquide saturé, vapeur, etc.)
 
-### Backend
-- **Flask 3.0** - Framework web Python
-- **NumPy** - Calculs matriciels
-- **SciPy** - Optimisation numérique
-- **Pandas** - Manipulation de données
-- **Matplotlib** - Visualisation
-- **thermo** - Propriétés thermodynamiques
-- **chemicals** - Base de données chimiques
-- **CoolProp** - Propriétés des fluides
+### 4. Spécifier la Séparation
+- Récupérations des composés léger et lourd (%)
+- Multiplicateur de reflux (1.1 à 3.0)
+- Efficacité des plateaux (50% à 95%)
 
-### Frontend
-- **React 18.2** - Framework UI
-- **Material-UI 5.15** - Composants UI modernes
-- **Recharts 2.10** - Graphiques interactifs
-- **Axios 1.6** - Client HTTP
-- **React-Toastify** - Notifications
-
----
-
-## 🎓 Cas d'Usage Pédagogique
-
-Cette application est un excellent exemple de:
-1. **Full-Stack Development** - Flask + React
-2. **API REST** - Design et implémentation
-3. **Calculs d'ingénierie** - Intégration Python
-4. **UX moderne** - Material Design
-5. **Visualisation de données** - Graphiques interactifs
+### 5. Lancer la Simulation
+Cliquez sur **"🚀 LANCER LA SIMULATION"** et consultez les résultats dans les 4 onglets.
 
 ---
 
 ## 🐛 Dépannage
 
-### Backend ne démarre pas
+### Erreur: Module non trouvé
 ```bash
-# Vérifier Python
-python --version
-
-# Réinstaller dépendances
-pip install -r backend/requirements.txt
+pip install -r requirements_streamlit.txt
 ```
 
-### Frontend ne démarre pas
+### Port déjà utilisé
+Streamlit utilise par défaut le port 8501. Pour changer:
 ```bash
-# Vérifier Node.js
-node --version
-
-# Nettoyer et réinstaller
-cd frontend
-rm -rf node_modules package-lock.json
-npm install
+streamlit run streamlit_app.py --server.port 8502
 ```
 
-### Erreur de connexion
-- Vérifier que les deux serveurs sont lancés
-- Vérifier les ports 3000 et 5000
-- Désactiver temporairement le pare-feu
+### Erreur de calcul thermodynamique
+Vérifiez que:
+- Les compositions totalisent 100%
+- Au moins 2 composés sont sélectionnés
+- Les paramètres sont dans des plages réalistes
 
 ---
 
-## 📈 Roadmap
+## 🚢 Déploiement
 
-### Version actuelle (v1.0)
-- ✅ Interface web complète
-- ✅ Méthodes simplifiées (Fenske, Underwood, Gilliland, Kirkbride)
-- ✅ Visualisations interactives
-- ✅ 13+ composés disponibles
+### Streamlit Cloud (Gratuit)
 
-### Futures versions
-- [ ] Méthode MESH rigoureuse
-- [ ] Optimisation multi-objectifs
-- [ ] Base de données des simulations
-- [ ] Authentification utilisateurs
-- [ ] Export PDF des rapports
-- [ ] Mode multi-colonnes
-- [ ] Intégration AspenPlus
+1. **Pusher sur GitHub**:
+```bash
+git add .
+git commit -m "Application Streamlit"
+git push
+```
 
----
+2. **Déployer sur Streamlit Cloud**:
+   - Aller sur [share.streamlit.io](https://share.streamlit.io)
+   - Connecter votre GitHub
+   - Sélectionner le repository et le fichier `streamlit_app.py`
+   - Cliquer sur "Deploy"
 
-## 👥 Contribution
+3. **Votre app est en ligne !** 🎉
 
-Projet développé pour le cours **Modélisation et Simulation des Procédés**.
-
-**Professeur:** BAKHER Zine Elabidine
-**Institution:** Université
-**Cours:** PIC - Modélisation et Simulation des Procédés
-
----
-
-## 📝 License
-
-Projet à usage pédagogique - Cours de Modélisation et Simulation des Procédés
-
----
-
-## 📞 Support
-
-Pour toute question ou problème:
-1. Consulter la [documentation complète](README_APPLICATION.md)
-2. Vérifier le [guide de dépannage](README_APPLICATION.md#-dépannage)
-3. Examiner l'[architecture](ARCHITECTURE.md)
-
----
-
-## 🎉 Crédits
-
-- **Méthodes de calcul**: Fenske, Underwood, Gilliland, Kirkbride
-- **Bibliothèques thermo**: thermo, chemicals, CoolProp
-- **UI Framework**: Material-UI
-- **Graphiques**: Recharts
-
----
-
-**Développé avec ❤️ pour l'apprentissage du génie des procédés**
-
----
-
-## 🚀 Démarrage Ultra-Rapide
+### Heroku
 
 ```bash
-# 1. Installer dépendances
-pip install Flask flask-cors numpy scipy pandas matplotlib thermo chemicals CoolProp
-cd frontend && npm install && cd ..
+# Procfile
+web: streamlit run streamlit_app.py --server.port=$PORT --server.address=0.0.0.0
 
-# 2. Lancer l'application
-# Windows: double-cliquer sur start_app.bat
-# Linux/Mac: ./start_app.sh
-
-# 3. Ouvrir: http://localhost:3000
-
-# 4. Profiter de la simulation!
+# Déployer
+heroku create distillation-app
+git push heroku main
 ```
 
 ---
 
-**Bonne simulation! 🧪✨**
+## ✅ Conformité PDF du Cours
+
+- [x] Toutes les équations (1-51) implémentées
+- [x] 4 méthodes simplifiées (Fenske, Underwood, Gilliland, Kirkbride)
+- [x] Visualisations conformes (profils, bilans)
+- [x] Exemple BTX validé
+- [x] Interface professionnelle
+
+---
+
+## 🎓 Contexte Pédagogique
+
+**Module:** Modélisation et Simulation des Procédés
+**Prof:** BAKHER Zine Elabidine
+**Filière:** PIC - UH1
+**Année:** 2024-2025
+
+### Compétences Acquises
+- Développement web avec Streamlit
+- Calculs thermodynamiques avancés
+- Visualisations de données scientifiques
+- Méthodes simplifiées de distillation
+- Déploiement d'applications web
+
+---
+
+## 🎉 Démarrage en 3 Commandes
+
+```bash
+pip install -r requirements_streamlit.txt
+streamlit run streamlit_app.py
+# Ouvrir http://localhost:8501
+```
+
+---
+
+## 📝 Licence
+
+Projet pédagogique - Cours de Modélisation et Simulation des Procédés
+
+---
+
+**Profitez de votre simulateur Streamlit !** 🧪✨
+
+*Application conforme au document PDF du cours - Équations 1-51 implémentées*

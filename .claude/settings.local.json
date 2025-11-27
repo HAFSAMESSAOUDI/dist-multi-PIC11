@@ -10,7 +10,20 @@
       "Bash(npm install:*)",
       "Bash(python app.py:*)",
       "Bash(npm start)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(python:*)",
+      "Bash(chcp 65001)",
+      "Bash(set:*)",
+      "Bash(npm create:*)",
+      "Bash(npm run dev:*)",
+      "Bash(streamlit run:*)",
+      "Bash(echo:*)",
+      "Bash(tree:*)",
+      "Bash(test:*)",
+      "Bash(node --version:*)",
+      "Bash(npm run build:*)",
+      "Bash(git rm:*)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []

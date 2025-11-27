@@ -1,0 +1,22 @@
+# Requirements for Complete Distillation Application
+# Modélisation et Simulation des Procédés - PIC UH1
+# Prof. BAKHER Zine Elabidine
+
+# Core dependencies
+numpy>=1.24.0
+scipy>=1.11.0
+
+# Streamlit framework
+streamlit>=1.28.0
+
+# Visualization
+plotly>=5.18.0
+
+# Data manipulation
+pandas>=2.0.0
+
+# Optional: For enhanced performance
+numba>=0.58.0
+
+# Optional: For export functionality
+openpyxl>=3.1.0
