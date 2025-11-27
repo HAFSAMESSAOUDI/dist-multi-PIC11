@@ -707,24 +707,81 @@ elif st.session_state.current_page == 'simulation':
                 df_dist = pd.DataFrame(r['distribution'])
                 st.dataframe(df_dist, use_container_width=True)
 
-                # Graphiques
-                col_g1, col_g2 = st.columns(2)
+                # Graphique 1: Bilans matières (débits)
+                st.subheader("Bilans Matières de la Colonne de Distillation")
 
-                with col_g1:
-                    fig1 = go.Figure(data=[go.Pie(
-                        labels=[d['compound'] for d in r['distribution']],
-                        values=[d['distillate'] for d in r['distribution']],
-                        title="Distillat"
-                    )])
-                    st.plotly_chart(fig1, use_container_width=True)
+                # Calculer les débits
+                feed_flow = feed_rate
+                dist_flow = sum([d['distillate'] for d in r['distribution']])
+                bott_flow = sum([d['bottoms'] for d in r['distribution']])
 
-                with col_g2:
-                    fig2 = go.Figure(data=[go.Pie(
-                        labels=[d['compound'] for d in r['distribution']],
-                        values=[d['bottoms'] for d in r['distribution']],
-                        title="Résidu"
-                    )])
-                    st.plotly_chart(fig2, use_container_width=True)
+                # Graphique des débits
+                fig_flow = go.Figure()
+                fig_flow.add_trace(go.Bar(
+                    x=['Alimentation', 'Distillat', 'Résidu'],
+                    y=[feed_flow, dist_flow, bott_flow],
+                    marker_color=['#3b82f6', '#10b981', '#ef4444'],
+                    text=[f"{feed_flow:.1f}<br>kmol/h", f"{dist_flow:.1f}<br>kmol/h", f"{bott_flow:.1f}<br>kmol/h"],
+                    textposition='outside'
+                ))
+                fig_flow.update_layout(
+                    title="Débits des flux",
+                    xaxis_title="",
+                    yaxis_title="Débit (kmol/h)",
+                    height=400,
+                    showlegend=False
+                )
+
+                # Graphique des compositions
+                fig_comp = go.Figure()
+                compounds_names = [d['compound'] for d in r['distribution']]
+                feed_comps = compositions
+                dist_comps = [d['distillate']/dist_flow if dist_flow > 0 else 0 for d in r['distribution']]
+                bott_comps = [d['bottoms']/bott_flow if bott_flow > 0 else 0 for d in r['distribution']]
+
+                x_pos = np.arange(len(compounds_names))
+                width = 0.25
+
+                fig_comp.add_trace(go.Bar(
+                    name='Alimentation',
+                    x=x_pos - width,
+                    y=feed_comps,
+                    marker_color='#3b82f6',
+                    width=width
+                ))
+                fig_comp.add_trace(go.Bar(
+                    name='Distillat',
+                    x=x_pos,
+                    y=dist_comps,
+                    marker_color='#10b981',
+                    width=width
+                ))
+                fig_comp.add_trace(go.Bar(
+                    name='Résidu',
+                    x=x_pos + width,
+                    y=bott_comps,
+                    marker_color='#ef4444',
+                    width=width
+                ))
+
+                fig_comp.update_layout(
+                    title="Compositions des flux",
+                    xaxis=dict(
+                        tickmode='array',
+                        tickvals=x_pos,
+                        ticktext=compounds_names
+                    ),
+                    yaxis_title="Fraction molaire",
+                    height=400,
+                    barmode='group',
+                    legend=dict(x=0.7, y=0.95)
+                )
+
+                col_bilan1, col_bilan2 = st.columns(2)
+                with col_bilan1:
+                    st.plotly_chart(fig_flow, use_container_width=True)
+                with col_bilan2:
+                    st.plotly_chart(fig_comp, use_container_width=True)
 
             with tab2:
                 st.subheader("Profil de Température")
@@ -759,6 +816,93 @@ elif st.session_state.current_page == 'simulation':
                 col_tac3.metric("Exploitation", f"{tac_result['operating']['total']/1000:.1f} k€/an")
                 col_tac4.metric("Maintenance", f"{tac_result['maintenance']/1000:.1f} k€/an")
 
+                st.divider()
+
+                # Graphique de l'effet du reflux
+                st.subheader("Effet du rapport de reflux sur le nombre de plateaux")
+
+                # Générer des données pour le graphique Gilliland
+                R_min = r['underwood']['R_min']
+                N_min = r['fenske']['N_min']
+
+                # Ratios de reflux à tester (de 1.05 à 3.0 fois R_min)
+                R_ratios = np.linspace(1.05, 3.0, 50)
+                N_values = []
+
+                for ratio in R_ratios:
+                    R_test = R_min * ratio
+                    X = (R_test - R_min) / (R_test + 1)
+                    exponent = (1 + 54.4 * X) * (X - 1) / ((11 + 117.2 * X) * np.sqrt(X))
+                    Y = 1 - np.exp(exponent)
+                    N_theoretical = N_min + Y / (1 - Y)
+                    N_real = N_theoretical / efficiency
+                    N_values.append(N_real)
+
+                # Créer le graphique
+                fig_reflux = go.Figure()
+
+                # Courbe N vs R/R_min
+                fig_reflux.add_trace(go.Scatter(
+                    x=R_ratios,
+                    y=N_values,
+                    mode='lines',
+                    name='Courbe N vs R/R_min',
+                    line=dict(color='#2563eb', width=3)
+                ))
+
+                # Ligne N_min
+                fig_reflux.add_hline(
+                    y=N_min,
+                    line_dash="dash",
+                    line_color="#ef4444",
+                    annotation_text=f"N_min = {N_min:.1f}",
+                    annotation_position="right"
+                )
+
+                # Ligne R = 1.3×R_min (valeur typique)
+                fig_reflux.add_vline(
+                    x=1.3,
+                    line_dash="dash",
+                    line_color="#10b981",
+                    annotation_text="R = 1.3×R_min (typique)",
+                    annotation_position="top"
+                )
+
+                # Point optimum économique (approximatif autour de 1.1-1.2)
+                optimum_ratio = 1.1
+                optimum_idx = np.argmin(np.abs(R_ratios - optimum_ratio))
+                fig_reflux.add_trace(go.Scatter(
+                    x=[R_ratios[optimum_idx]],
+                    y=[N_values[optimum_idx]],
+                    mode='markers',
+                    name=f'Optimum économique (R/R_min ≈ {optimum_ratio:.2f})',
+                    marker=dict(size=15, color='#ef4444', symbol='circle')
+                ))
+
+                # Point de fonctionnement actuel
+                current_ratio = r['gilliland']['R_operating'] / R_min
+                current_N = r['gilliland']['N_real']
+                fig_reflux.add_trace(go.Scatter(
+                    x=[current_ratio],
+                    y=[current_N],
+                    mode='markers',
+                    name=f'Point actuel (R/R_min = {current_ratio:.2f})',
+                    marker=dict(size=12, color='#8b5cf6', symbol='diamond')
+                ))
+
+                fig_reflux.update_layout(
+                    title="Effet du rapport de reflux sur le nombre de plateaux<br>(Système BTX)",
+                    xaxis_title="R / R_min",
+                    yaxis_title="Nombre de plateaux réels",
+                    height=500,
+                    hovermode='x unified',
+                    legend=dict(x=0.6, y=0.95, bgcolor='rgba(255,255,255,0.8)')
+                )
+
+                st.plotly_chart(fig_reflux, use_container_width=True)
+
+                st.info(f"📊 N_min = {N_min:.1f} | R_min = {R_min:.3f} | Point optimal économique ≈ 1.1×R_min | Point typique = 1.3×R_min")
+
         elif results_shortcut and not results_shortcut['success']:
             st.error(f"Erreur: {results_shortcut['error']}")
 
@@ -786,46 +930,149 @@ elif st.session_state.current_page == 'simulation':
                 ])
 
                 with tab1:
-                    st.subheader("Profils de Composition Liquide par Plateau")
-                    fig = go.Figure()
+                    st.subheader("Profils de Composition dans la Colonne")
+
+                    # Créer subplots pour liquide et vapeur côte à côte
+                    fig_profiles = make_subplots(
+                        rows=1, cols=2,
+                        subplot_titles=("Phase Liquide", "Phase Vapeur"),
+                        horizontal_spacing=0.12
+                    )
+
+                    # Couleurs pour chaque composé
+                    colors = ['#fbbf24', '#a3e635', '#22d3ee', '#f97316', '#c084fc', '#fb923c']
+
+                    # Profils de composition liquide (x)
                     for i, comp_key in enumerate(selected_compounds):
                         comp_name = COMPOUNDS_LIBRARY[comp_key]['name']
                         x_profile = [results_mesh['x'][stage][i] for stage in range(results_mesh['n_stages'])]
-                        fig.add_trace(go.Scatter(
-                            x=list(range(1, results_mesh['n_stages'] + 1)),
-                            y=x_profile,
+                        stages = list(range(1, results_mesh['n_stages'] + 1))
+
+                        fig_profiles.add_trace(go.Scatter(
+                            x=x_profile,
+                            y=stages,
                             mode='lines+markers',
                             name=comp_name,
-                            line=dict(width=2),
-                            marker=dict(size=6)
-                        ))
-                    fig.update_layout(
-                        xaxis_title="Numéro de Plateau",
-                        yaxis_title="Fraction Molaire Liquide",
-                        height=500,
-                        hovermode='x unified'
+                            line=dict(width=2, color=colors[i % len(colors)]),
+                            marker=dict(size=6),
+                            showlegend=True
+                        ), row=1, col=1)
+
+                    # Profils de composition vapeur (y)
+                    for i, comp_key in enumerate(selected_compounds):
+                        comp_name = COMPOUNDS_LIBRARY[comp_key]['name']
+                        y_profile = [results_mesh['y'][stage][i] for stage in range(results_mesh['n_stages'])]
+                        stages = list(range(1, results_mesh['n_stages'] + 1))
+
+                        fig_profiles.add_trace(go.Scatter(
+                            x=y_profile,
+                            y=stages,
+                            mode='lines+markers',
+                            name=comp_name,
+                            line=dict(width=2, color=colors[i % len(colors)]),
+                            marker=dict(size=6),
+                            showlegend=False
+                        ), row=1, col=2)
+
+                    # Ajouter ligne horizontale pour le plateau d'alimentation
+                    fig_profiles.add_hline(
+                        y=results_mesh['feed_stage'],
+                        line_dash="dash",
+                        line_color="#2563eb",
+                        line_width=2,
+                        annotation_text=f"Plateau alimentation ({results_mesh['feed_stage']})",
+                        annotation_position="right",
+                        row=1, col=1
                     )
-                    st.plotly_chart(fig, use_container_width=True)
-                    st.info(f"Alimentation au plateau {results_mesh['feed_stage']}")
+                    fig_profiles.add_hline(
+                        y=results_mesh['feed_stage'],
+                        line_dash="dash",
+                        line_color="#2563eb",
+                        line_width=2,
+                        row=1, col=2
+                    )
+
+                    # Mise en forme
+                    fig_profiles.update_xaxes(title_text="Fraction molaire liquide (x)", row=1, col=1, range=[0, 1])
+                    fig_profiles.update_xaxes(title_text="Fraction molaire vapeur (y)", row=1, col=2, range=[0, 1])
+                    fig_profiles.update_yaxes(title_text="Numéro de plateau", row=1, col=1, autorange="reversed")
+                    fig_profiles.update_yaxes(title_text="Numéro de plateau", row=1, col=2, autorange="reversed")
+
+                    fig_profiles.update_layout(
+                        title="Profils de Composition dans la Colonne",
+                        height=600,
+                        hovermode='y unified',
+                        legend=dict(x=1.05, y=0.5, xanchor='left', yanchor='middle')
+                    )
+
+                    st.plotly_chart(fig_profiles, use_container_width=True)
+
+                    # Information additionnelle
+                    col_info1, col_info2 = st.columns(2)
+                    with col_info1:
+                        st.info(f"🔵 Alimentation au plateau {results_mesh['feed_stage']}")
+                    with col_info2:
+                        st.success(f"✓ {results_mesh['n_stages']} plateaux théoriques")
 
                 with tab2:
                     st.subheader("Profil de Température dans la Colonne")
                     T_celsius = [T - 273.15 for T in results_mesh['T']]
-                    fig = go.Figure()
-                    fig.add_trace(go.Scatter(
-                        x=list(range(1, results_mesh['n_stages'] + 1)),
-                        y=T_celsius,
+                    stages = list(range(1, results_mesh['n_stages'] + 1))
+
+                    fig_temp = go.Figure()
+                    fig_temp.add_trace(go.Scatter(
+                        y=stages,
+                        x=T_celsius,
                         mode='lines+markers',
                         name='Température',
-                        line=dict(color='#dc2626', width=3),
-                        marker=dict(size=8)
+                        line=dict(color='#f97316', width=3),
+                        marker=dict(size=8, color='#f97316'),
+                        fill=None
                     ))
-                    fig.update_layout(
-                        xaxis_title="Numéro de Plateau",
-                        yaxis_title="Température (°C)",
-                        height=500
+
+                    # Ajouter ligne pour le plateau d'alimentation
+                    fig_temp.add_hline(
+                        y=results_mesh['feed_stage'],
+                        line_dash="dash",
+                        line_color="#2563eb",
+                        line_width=2,
+                        annotation_text=f"Plateau alimentation ({results_mesh['feed_stage']})",
+                        annotation_position="right"
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+
+                    # Annoter les températures limites
+                    fig_temp.add_annotation(
+                        x=T_celsius[0],
+                        y=1,
+                        text=f"{T_celsius[0]:.1f}°C",
+                        showarrow=True,
+                        arrowhead=2,
+                        ax=-40,
+                        ay=-30,
+                        font=dict(size=12, color="#dc2626", weight="bold")
+                    )
+
+                    fig_temp.add_annotation(
+                        x=T_celsius[-1],
+                        y=results_mesh['n_stages'],
+                        text=f"{T_celsius[-1]:.1f}°C",
+                        showarrow=True,
+                        arrowhead=2,
+                        ax=40,
+                        ay=30,
+                        font=dict(size=12, color="#dc2626", weight="bold")
+                    )
+
+                    fig_temp.update_layout(
+                        title="Profil de Température dans la Colonne",
+                        xaxis_title="Température (°C)",
+                        yaxis_title="Numéro de plateau",
+                        height=600,
+                        yaxis=dict(autorange="reversed"),
+                        hovermode='y'
+                    )
+
+                    st.plotly_chart(fig_temp, use_container_width=True)
 
                     col_t1, col_t2, col_t3 = st.columns(3)
                     col_t1.metric("T Tête", f"{T_celsius[0]:.1f} °C")
@@ -868,6 +1115,82 @@ elif st.session_state.current_page == 'simulation':
                 with tab4:
                     st.subheader("Bilan Matière MESH")
 
+                    # Graphiques de bilans matière similaires à ceux des méthodes simplifiées
+                    # Calculer les débits
+                    dist_flow = results_mesh['D']
+                    bott_flow = results_mesh['B']
+
+                    # Graphique 1: Bilans des débits
+                    fig_flow_mesh = go.Figure()
+                    fig_flow_mesh.add_trace(go.Bar(
+                        x=['Alimentation', 'Distillat', 'Résidu'],
+                        y=[feed_rate, dist_flow, bott_flow],
+                        marker_color=['#3b82f6', '#10b981', '#ef4444'],
+                        text=[f"{feed_rate:.1f}<br>kmol/h", f"{dist_flow:.1f}<br>kmol/h", f"{bott_flow:.1f}<br>kmol/h"],
+                        textposition='outside'
+                    ))
+                    fig_flow_mesh.update_layout(
+                        title="Débits des flux",
+                        xaxis_title="",
+                        yaxis_title="Débit (kmol/h)",
+                        height=400,
+                        showlegend=False
+                    )
+
+                    # Graphique 2: Compositions des flux
+                    fig_comp_mesh = go.Figure()
+                    compounds_names = [COMPOUNDS_LIBRARY[comp_key]['name'] for comp_key in selected_compounds]
+                    feed_comps = compositions
+                    dist_comps = results_mesh['x_D']
+                    bott_comps = results_mesh['x_B']
+
+                    x_pos = np.arange(len(compounds_names))
+                    width = 0.25
+
+                    fig_comp_mesh.add_trace(go.Bar(
+                        name='Alimentation',
+                        x=x_pos - width,
+                        y=feed_comps,
+                        marker_color='#3b82f6',
+                        width=width
+                    ))
+                    fig_comp_mesh.add_trace(go.Bar(
+                        name='Distillat',
+                        x=x_pos,
+                        y=dist_comps,
+                        marker_color='#10b981',
+                        width=width
+                    ))
+                    fig_comp_mesh.add_trace(go.Bar(
+                        name='Résidu',
+                        x=x_pos + width,
+                        y=bott_comps,
+                        marker_color='#ef4444',
+                        width=width
+                    ))
+
+                    fig_comp_mesh.update_layout(
+                        title="Compositions des flux",
+                        xaxis=dict(
+                            tickmode='array',
+                            tickvals=x_pos,
+                            ticktext=compounds_names
+                        ),
+                        yaxis_title="Fraction molaire",
+                        height=400,
+                        barmode='group',
+                        legend=dict(x=0.7, y=0.95)
+                    )
+
+                    col_graph1, col_graph2 = st.columns(2)
+                    with col_graph1:
+                        st.plotly_chart(fig_flow_mesh, use_container_width=True)
+                    with col_graph2:
+                        st.plotly_chart(fig_comp_mesh, use_container_width=True)
+
+                    st.divider()
+
+                    # Tableaux détaillés
                     col_bilan1, col_bilan2 = st.columns(2)
 
                     with col_bilan1:
@@ -902,9 +1225,9 @@ elif st.session_state.current_page == 'simulation':
                     error_balance = abs(total_in - total_out) / total_in * 100
 
                     if error_balance < 0.1:
-                        st.success(f"Bilan matière vérifié: F={total_in:.2f} | D+B={total_out:.2f} | Erreur: {error_balance:.4f}%")
+                        st.success(f"✓ Bilan matière vérifié: F={total_in:.2f} | D+B={total_out:.2f} | Erreur: {error_balance:.4f}%")
                     else:
-                        st.warning(f"Erreur de bilan: {error_balance:.2f}%")
+                        st.warning(f"⚠ Erreur de bilan: {error_balance:.2f}%")
 
                 with tab5:
                     st.subheader("Besoins Énergétiques")

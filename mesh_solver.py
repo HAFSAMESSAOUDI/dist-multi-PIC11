@@ -336,6 +336,14 @@ class MESHSolver:
             if verbose:
                 print(f"\n⚠ Nombre maximum d'itérations atteint ({max_iter})")
 
+        # Calculer les besoins énergétiques
+        # Q_condenser (condenseur en tête) - chaleur à retirer
+        lambda_avg = 35000  # kJ/kmol (estimation chaleur latente)
+        Q_condenser = (self.R + 1) * self.D * lambda_avg  # kJ/h
+
+        # Q_reboiler (rebouilleur en fond) - chaleur à fournir
+        Q_reboiler = (self.R + 1) * self.D * lambda_avg  # kJ/h
+
         # Construire les résultats
         results = {
             'converged': converged,
@@ -361,7 +369,11 @@ class MESHSolver:
                 'temperature': self.T[-1] - 273.15  # °C
             },
             'feed_stage': self.feed_stage,
-            'reflux_ratio': self.R
+            'reflux_ratio': self.R,
+            'duties': {
+                'condenser': Q_condenser,  # kJ/h
+                'reboiler': Q_reboiler     # kJ/h
+            }
         }
 
         return results
