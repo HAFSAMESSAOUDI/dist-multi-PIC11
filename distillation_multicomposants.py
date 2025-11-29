@@ -9,11 +9,7 @@ Université uh1
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy.optimize import fsolve, brentq, minimize
-from scipy.linalg import solve_banded
-from thermo.chemical import Chemical
-from thermo import ChemicalConstantsPackage, PRMIX, CEOSLiquid, CEOSGas
 import warnings
 warnings.filterwarnings('ignore')
 
