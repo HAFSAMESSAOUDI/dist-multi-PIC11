@@ -9,6 +9,7 @@ Génère un rapport LaTeX puis PDF avec les résultats de simulation
 import os
 import subprocess
 import tempfile
+import requests
 from datetime import datetime
 
 
@@ -52,39 +53,95 @@ class SimulationPDFGenerator:
 \usepackage{graphicx}
 \usepackage{xcolor}
 \usepackage{fancyhdr}
+\usepackage{hyperref}
 
-\geometry{margin=2cm}
+\geometry{margin=2.5cm}
 
+% Définition des couleurs
 \definecolor{darkblue}{RGB}{0,51,102}
 \definecolor{lightblue}{RGB}{59,130,246}
+\definecolor{titleblue}{RGB}{25,25,112}
 
+% Configuration hyperref pour la table des matières cliquable
+\hypersetup{
+    colorlinks=true,
+    linkcolor=darkblue,
+    filecolor=darkblue,
+    urlcolor=lightblue,
+    citecolor=darkblue,
+    pdftitle={Rapport de Simulation - Distillation Multicomposants},
+    pdfauthor={Simulation App},
+    pdfsubject={Distillation},
+    pdfkeywords={distillation, simulation, génie chimique}
+}
+
+% Style de page
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[L]{\small Rapport de Simulation - Distillation}
-\fancyhead[R]{\small """ + datetime.now().strftime("%d/%m/%Y") + r"""}
-\fancyfoot[C]{\thepage}
+\fancyhead[L]{\small\textcolor{darkblue}{Rapport de Simulation}}
+\fancyhead[R]{\small\textcolor{darkblue}{""" + datetime.now().strftime("%d/%m/%Y") + r"""}}
+\fancyfoot[C]{\textcolor{darkblue}{\thepage}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
 
 \begin{document}
 
-% Page de titre
-\begin{center}
-{\Huge\bfseries Rapport de Simulation\\[0.3cm]}
-{\Large Distillation Multicomposants\\[1cm]}
+% Page de garde professionnelle
+\begin{titlepage}
+    \centering
 
-\begin{tabular}{rl}
-\textbf{Module:} & Modélisation et Simulation des Procédés \\
-\textbf{Professeur:} & BAKHER Zine Elabidine \\
-\textbf{Filière:} & Procédés Industriels et Chimiques (PIC) \\
-\textbf{Université:} & Hassan 1er \\[0.5cm]
-\textbf{Date:} & """ + datetime.now().strftime("%d %B %Y") + r""" \\
-\textbf{Méthode:} & """ + method + r""" \\
-\end{tabular}
-\end{center}
+    % Espace supérieur
+    \vspace*{2cm}
 
-\vfill
+    % Titre principal
+    {\Huge\bfseries\textcolor{titleblue}{Rapport de Simulation}\par}
+    \vspace{1cm}
+    {\LARGE\textcolor{darkblue}{Distillation Multicomposants}\par}
+
+    \vspace{2cm}
+
+    % Ligne de séparation
+    \textcolor{lightblue}{\rule{\textwidth}{2pt}}
+
+    \vspace{1.5cm}
+
+    % Informations de simulation
+    \begin{flushleft}
+    \large
+    \textbf{\textcolor{darkblue}{Méthode de calcul:}} """ + method + r"""\\[0.5cm]
+    \textbf{\textcolor{darkblue}{Date de génération:}} """ + datetime.now().strftime("%d %B %Y") + r"""\\[0.5cm]
+    \textbf{\textcolor{darkblue}{Heure:}} """ + datetime.now().strftime("%H:%M") + r"""\\
+    \end{flushleft}
+
+    \vfill
+
+    % Ligne de séparation
+    \textcolor{lightblue}{\rule{\textwidth}{2pt}}
+
+    \vspace{0.5cm}
+
+    % Pied de page
+    {\large\textit{Génie des Procédés Industriels et Chimiques}\par}
+    {\normalsize Application de Simulation de Distillation\par}
+
+    \vspace{1cm}
+\end{titlepage}
+
+% Table des matières automatique avec titre personnalisé
+\newpage
+\thispagestyle{empty}
+\vspace*{1cm}
+{\LARGE\bfseries\textcolor{titleblue}{Table des Matières}\par}
+\vspace{0.5cm}
+\textcolor{lightblue}{\rule{\textwidth}{1pt}}
+\vspace{0.5cm}
 
 \tableofcontents
-\newpage
+
+\clearpage
+
+% Réinitialiser la numérotation des pages
+\setcounter{page}{1}
 
 % Section 1: Paramètres d'entrée
 \section{Paramètres d'Entrée}
@@ -147,12 +204,41 @@ class SimulationPDFGenerator:
 
         # Conclusion
         latex += r"\section{Conclusion}" + "\n\n"
-        latex += "Cette simulation a permis de dimensionner une colonne de distillation "
-        latex += f"pour séparer un mélange de {len(params.get('compounds', []))} composés. "
 
+        # Résumé de la simulation
+        num_compounds = len(params.get('compounds', []))
+        latex += f"Cette simulation a permis de dimensionner une colonne de distillation pour séparer "
+        latex += f"un mélange de {num_compounds} composés. "
+
+        # Méthode utilisée
+        if method == "Méthodes Simplifiées":
+            latex += "Les méthodes simplifiées (Fenske, Underwood, Gilliland et Kirkbride) ont été utilisées "
+            latex += "pour obtenir rapidement une première estimation de la configuration de la colonne. "
+        elif method == "MESH Rigoureux":
+            latex += "La méthode MESH rigoureuse a été utilisée pour une résolution plateau par plateau "
+            latex += "en tenant compte de tous les équilibres thermodynamiques et bilans matière/énergie. "
+
+        # Résultats principaux
         if 'column_design' in results:
-            n_real = results['column_design'].get('total_stages', 0)
-            latex += f"Le nombre de plateaux réels requis est de {n_real:.0f}. "
+            design = results['column_design']
+            n_real = design.get('total_stages', 0)
+            latex += f"\n\nLes principaux résultats obtenus sont:\n"
+            latex += r"\begin{itemize}" + "\n"
+            latex += f"\\item Nombre de plateaux réels: {n_real:.0f}\n"
+
+            if 'feed_stage' in design:
+                latex += f"\\item Plateau d'alimentation: {design.get('feed_stage', 0):.0f}\n"
+
+        # Conditions opératoires
+        latex += f"\\item Débit d'alimentation: {params.get('feed_flow', 100):.2f} kmol/h\n"
+        latex += f"\\item Pression opératoire: {params.get('pressure', 1.013):.3f} bar\n"
+        latex += r"\end{itemize}" + "\n\n"
+
+        # Note finale
+        latex += r"\vspace{0.5cm}" + "\n"
+        latex += r"\noindent\textit{Ce rapport a été généré automatiquement par l'application de simulation "
+        latex += r"de distillation multicomposants. Les résultats doivent être validés avant toute utilisation "
+        latex += r"dans un projet industriel.}" + "\n\n"
 
         latex += r"\end{document}"
 
@@ -327,26 +413,97 @@ class SimulationPDFGenerator:
 
         return latex
 
-    def generate_pdf(self, simulation_results, method="Méthodes Simplifiées"):
+    def _compile_online_latex(self, latex_code):
         """
-        Génère le PDF complet
+        Compile LaTeX en utilisant LaTeX-on-HTTP (service gratuit en ligne)
 
         Parameters
         ----------
-        simulation_results : dict
-            Résultats de simulation
-        method : str
-            Méthode utilisée
+        latex_code : str
+            Code LaTeX à compiler
 
         Returns
         -------
-        pdf_bytes : bytes
-            Contenu du PDF généré, ou None si échec
+        result : dict
+            {
+                'success': bool,
+                'pdf_bytes': bytes (si succès),
+                'error': str (si erreur)
+            }
         """
+        try:
+            # Service LaTeX-on-HTTP
+            url = "https://latex.ytotech.com/builds/sync"
 
-        # Générer le LaTeX
-        latex_code = self.generate_latex_report(simulation_results, method)
+            # Préparer les fichiers pour la requête multipart
+            files = {
+                'compiler': (None, 'pdflatex'),
+                'resources[]': ('rapport.tex', latex_code.encode('utf-8'), 'text/plain')
+            }
 
+            # Envoyer la requête
+            response = requests.post(
+                url,
+                files=files,
+                timeout=60  # 60 secondes max
+            )
+
+            # Vérifier la réponse (200 OK ou 201 Created)
+            if response.status_code in [200, 201]:
+                # Le PDF est dans la réponse
+                pdf_bytes = response.content
+
+                # Vérifier que c'est bien un PDF
+                if pdf_bytes and len(pdf_bytes) > 4 and pdf_bytes[:4] == b'%PDF':
+                    return {
+                        'success': True,
+                        'pdf_bytes': pdf_bytes
+                    }
+                else:
+                    return {
+                        'success': False,
+                        'error': f'Réponse invalide (taille: {len(pdf_bytes)} bytes, début: {pdf_bytes[:10]})'
+                    }
+            else:
+                return {
+                    'success': False,
+                    'error': f'Erreur service compilation (HTTP {response.status_code})'
+                }
+
+        except requests.Timeout:
+            return {
+                'success': False,
+                'error': 'Timeout du service de compilation (>60s)'
+            }
+        except requests.RequestException as e:
+            return {
+                'success': False,
+                'error': f'Erreur réseau: {str(e)}'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Erreur compilation en ligne: {str(e)}'
+            }
+
+    def _compile_local_pdflatex(self, latex_code):
+        """
+        Compile LaTeX en utilisant pdflatex local (fallback)
+
+        Parameters
+        ----------
+        latex_code : str
+            Code LaTeX à compiler
+
+        Returns
+        -------
+        result : dict
+            {
+                'success': bool,
+                'pdf_bytes': bytes (si succès),
+                'error': str (si erreur)
+            }
+        """
         # Créer un fichier temporaire
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         tex_filename = f"rapport_distillation_{timestamp}.tex"
@@ -358,47 +515,134 @@ class SimulationPDFGenerator:
             with open(tex_path, 'w', encoding='utf-8') as f:
                 f.write(latex_code)
 
-            # Compiler avec pdflatex (si disponible)
+            # Vérifier si pdflatex est disponible
             try:
-                # Première compilation
-                subprocess.run(
-                    ['pdflatex', '-interaction=nonstopmode', '-output-directory', self.temp_dir, tex_path],
-                    check=True,
-                    capture_output=True,
-                    timeout=30
-                )
-
-                # Deuxième compilation (pour table des matières)
-                subprocess.run(
-                    ['pdflatex', '-interaction=nonstopmode', '-output-directory', self.temp_dir, tex_path],
-                    check=True,
-                    capture_output=True,
-                    timeout=30
-                )
-
-                # Lire le PDF généré
-                if os.path.exists(pdf_path):
-                    with open(pdf_path, 'rb') as f:
-                        pdf_bytes = f.read()
-
-                    # Nettoyer les fichiers temporaires
-                    for ext in ['.tex', '.aux', '.log', '.toc', '.out']:
-                        temp_file = pdf_path.replace('.pdf', ext)
-                        if os.path.exists(temp_file):
-                            os.remove(temp_file)
-
-                    return pdf_bytes
-                else:
-                    return None
-
+                subprocess.run(['pdflatex', '--version'],
+                             capture_output=True,
+                             timeout=5,
+                             check=True)
+                pdflatex_available = True
             except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
-                # pdflatex non disponible ou erreur de compilation
-                # Retourner le code LaTeX comme fallback
-                return latex_code.encode('utf-8')
+                return {
+                    'success': False,
+                    'error': 'pdflatex non installé localement'
+                }
+
+            # Première compilation
+            subprocess.run(
+                ['pdflatex', '-interaction=nonstopmode', '-output-directory', self.temp_dir, tex_path],
+                capture_output=True,
+                timeout=30,
+                text=True
+            )
+
+            # Deuxième compilation (pour table des matières)
+            subprocess.run(
+                ['pdflatex', '-interaction=nonstopmode', '-output-directory', self.temp_dir, tex_path],
+                capture_output=True,
+                timeout=30,
+                text=True
+            )
+
+            # Lire le PDF généré
+            if os.path.exists(pdf_path):
+                with open(pdf_path, 'rb') as f:
+                    pdf_bytes = f.read()
+
+                # Nettoyer les fichiers temporaires
+                for ext in ['.tex', '.aux', '.log', '.toc', '.out']:
+                    temp_file = pdf_path.replace('.pdf', ext)
+                    if os.path.exists(temp_file):
+                        try:
+                            os.remove(temp_file)
+                        except:
+                            pass
+
+                return {
+                    'success': True,
+                    'pdf_bytes': pdf_bytes
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': 'PDF non généré après compilation locale'
+                }
+
+        except subprocess.TimeoutExpired:
+            return {
+                'success': False,
+                'error': 'Timeout compilation locale (>30s)'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f'Erreur compilation locale: {str(e)}'
+            }
+
+    def generate_pdf(self, simulation_results, method="Méthodes Simplifiées"):
+        """
+        Génère le PDF complet (compile automatiquement en ligne ou localement)
+
+        Parameters
+        ----------
+        simulation_results : dict
+            Résultats de simulation
+        method : str
+            Méthode utilisée
+
+        Returns
+        -------
+        result : dict
+            {
+                'success': bool,
+                'pdf_bytes': bytes (si PDF généré),
+                'latex_code': str (toujours disponible),
+                'error': str (si erreur),
+                'method': str ('online', 'pdflatex', ou 'latex_only')
+            }
+        """
+
+        # Générer le LaTeX
+        latex_code = self.generate_latex_report(simulation_results, method)
+
+        try:
+            # MÉTHODE 1: Compilation en ligne (prioritaire - pas besoin d'installation)
+            online_result = self._compile_online_latex(latex_code)
+
+            if online_result['success']:
+                return {
+                    'success': True,
+                    'pdf_bytes': online_result['pdf_bytes'],
+                    'latex_code': latex_code,
+                    'method': 'online'
+                }
+
+            # MÉTHODE 2: Fallback sur pdflatex local si disponible
+            local_result = self._compile_local_pdflatex(latex_code)
+
+            if local_result['success']:
+                return {
+                    'success': True,
+                    'pdf_bytes': local_result['pdf_bytes'],
+                    'latex_code': latex_code,
+                    'method': 'pdflatex'
+                }
+
+            # Aucune méthode n'a fonctionné
+            return {
+                'success': False,
+                'latex_code': latex_code,
+                'error': f"Compilation échouée - En ligne: {online_result.get('error', 'erreur inconnue')}, Local: {local_result.get('error', 'non disponible')}",
+                'method': 'latex_only'
+            }
 
         except Exception as e:
-            print(f"Erreur génération PDF: {e}")
-            return None
+            return {
+                'success': False,
+                'latex_code': latex_code,
+                'error': f'Erreur: {str(e)}',
+                'method': 'latex_only'
+            }
 
     def generate_latex_only(self, simulation_results, method="Méthodes Simplifiées"):
         """

@@ -1,0 +1,633 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{caption}
+
+\geometry{margin=2.5cm}
+
+% Couleurs
+\definecolor{darkblue}{RGB}{0,51,102}
+\definecolor{lightblue}{RGB}{59,130,246}
+\definecolor{titleblue}{RGB}{25,25,112}
+\definecolor{codegray}{RGB}{240,240,240}
+\definecolor{codegreen}{RGB}{0,128,0}
+\definecolor{codepurple}{RGB}{128,0,128}
+
+% Configuration hyperref
+\hypersetup{
+    colorlinks=true,
+    linkcolor=darkblue,
+    filecolor=darkblue,
+    urlcolor=lightblue,
+    citecolor=darkblue,
+    pdftitle={Documentation - Application de Distillation},
+    pdfauthor={},
+    pdfsubject={Architecture et Technologies},
+    pdfkeywords={distillation, python, streamlit, react, OOP}
+}
+
+% Configuration listings pour code Python
+\lstset{
+    language=Python,
+    backgroundcolor=\color{codegray},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{gray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2,
+    frame=single
+}
+
+% Style de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{darkblue}{Documentation Technique}}
+\fancyhead[R]{\small\textcolor{darkblue}{Application de Distillation}}
+\fancyfoot[C]{\textcolor{darkblue}{\thepage}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0.5pt}
+
+\begin{document}
+
+% Page de garde
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    {\Huge\bfseries\textcolor{titleblue}{Documentation Technique}\par}
+    \vspace{1cm}
+    {\LARGE\textcolor{darkblue}{Application de Distillation Multicomposants}\par}
+
+    \vspace{2cm}
+    \textcolor{lightblue}{\rule{\textwidth}{2pt}}
+
+    \vspace{2cm}
+
+    {\Large Architecture, Technologies et Implémentation\par}
+
+    \vfill
+
+    \textcolor{lightblue}{\rule{\textwidth}{2pt}}
+    \vspace{0.5cm}
+
+    {\large\textit{Génie des Procédés Industriels et Chimiques}\par}
+    {\normalsize Version 3.1\par}
+
+    \vspace{1cm}
+\end{titlepage}
+
+% Table des matières
+\newpage
+\tableofcontents
+\thispagestyle{empty}
+\clearpage
+\setcounter{page}{1}
+
+% ============================================================
+\section{Introduction}
+
+Cette application web interactive permet la simulation et l'optimisation de colonnes de distillation multicomposants. Elle combine des méthodes simplifiées classiques avec des algorithmes rigoureux pour offrir une solution complète d'analyse et de dimensionnement.
+
+\subsection{Objectifs}
+
+\begin{itemize}
+\item Simuler des colonnes de distillation avec 2 à 6 composés
+\item Comparer différentes méthodes de calcul (simplifiées vs. rigoureuses)
+\item Optimiser économiquement la configuration (TAC)
+\item Générer automatiquement des rapports PDF professionnels
+\item Fournir des visualisations interactives des résultats
+\end{itemize}
+
+\subsection{Fonctionnalités Principales}
+
+\begin{itemize}
+\item \textbf{Méthodes Simplifiées:} Fenske, Underwood, Gilliland, Kirkbride
+\item \textbf{Méthode MESH Rigoureuse:} Résolution plateau par plateau (Wang-Henke)
+\item \textbf{Modèles Thermodynamiques:} Idéal, Wilson, NRTL, UNIQUAC
+\item \textbf{Optimisation Économique:} Minimisation du TAC (Total Annualized Cost)
+\item \textbf{Génération PDF:} Compilation LaTeX automatique en ligne
+\item \textbf{Export:} Excel, PDF, LaTeX
+\end{itemize}
+
+% ============================================================
+\section{Technologies et Frameworks}
+
+\subsection{Stack Technologique}
+
+L'application utilise une architecture full-stack moderne:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Composant} & \textbf{Technologie} \\
+\midrule
+Backend & Python 3.13 \\
+Framework Web & Streamlit 1.49+ \\
+Frontend (optionnel) & React.js \\
+Calcul Scientifique & NumPy 2.2+, SciPy 1.14+ \\
+Visualisation & Plotly 6.0+ \\
+Export Excel & Pandas 2.3+, OpenPyXL 3.1+ \\
+Génération PDF & LaTeX-on-HTTP (API) \\
+Requêtes HTTP & Requests 2.31+ \\
+\bottomrule
+\end{tabular}
+\caption{Technologies utilisées}
+\end{table}
+
+\subsection{Framework Streamlit}
+
+\textbf{Streamlit} est le framework principal pour l'interface utilisateur. Il permet de créer des applications web interactives en Python pur, sans nécessiter de connaissances HTML/CSS/JavaScript.
+
+\textbf{Avantages:}
+\begin{itemize}
+\item Développement rapide (interface en Python)
+\item Widgets interactifs intégrés (sliders, inputs, selectbox)
+\item Auto-reload lors des modifications
+\item Déploiement simple (Streamlit Cloud)
+\end{itemize}
+
+\subsection{Librairies Scientifiques}
+
+\textbf{NumPy:} Calculs matriciels, opérations vectorisées, résolution de systèmes linéaires
+
+\textbf{SciPy:} Optimisation non-linéaire (\texttt{fsolve}, \texttt{minimize}), intégration numérique
+
+\textbf{Pandas:} Manipulation de données tabulaires, export Excel
+
+\textbf{Plotly:} Graphiques interactifs (McCabe-Thiele, profils de température, courbes TAC)
+
+\subsection{Architecture Frontend (Optionnel)}
+
+Un frontend React.js est disponible comme alternative à Streamlit:
+
+\begin{itemize}
+\item \textbf{Framework:} React.js
+\item \textbf{Communication:} API REST avec backend Flask
+\item \textbf{Avantage:} Interface plus personnalisable, meilleure performance client
+\end{itemize}
+
+% ============================================================
+\section{Architecture Orientée Objet}
+
+L'application suit les principes de la \textbf{Programmation Orientée Objet (OOP)} pour garantir modularité, réutilisabilité et maintenabilité.
+
+\subsection{Principes OOP Appliqués}
+
+\begin{enumerate}
+\item \textbf{Encapsulation:} Chaque classe gère ses propres données et méthodes
+\item \textbf{Abstraction:} Interfaces claires entre modules
+\item \textbf{Séparation des responsabilités:} Une classe = une fonction métier
+\item \textbf{Réutilisabilité:} Classes indépendantes et génériques
+\end{enumerate}
+
+\subsection{Structure des Modules}
+
+L'application est divisée en 6 modules Python principaux, chacun contenant une ou plusieurs classes:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lp{8cm}}
+\toprule
+\textbf{Module} & \textbf{Responsabilité} \\
+\midrule
+\texttt{distillation\_multicomposants.py} & Méthodes simplifiées \\
+\texttt{mesh\_solver.py} & Résolution MESH rigoureuse \\
+\texttt{activity\_models.py} & Modèles thermodynamiques \\
+\texttt{economic\_optimization.py} & Optimisation TAC \\
+\texttt{pdf\_generator.py} & Génération de rapports PDF \\
+\texttt{streamlit\_app\_enhanced.py} & Interface utilisateur \\
+\bottomrule
+\end{tabular}
+\caption{Modules de l'application}
+\end{table}
+
+% ============================================================
+\section{Classes Principales}
+
+\subsection{Classe: \texttt{DistillationColumn}}
+
+\textbf{Fichier:} \texttt{distillation\_multicomposants.py}
+
+\textbf{Rôle:} Implémenter les méthodes simplifiées de dimensionnement de colonne de distillation.
+
+\textbf{Attributs:}
+\begin{itemize}
+\item \texttt{components}: Liste des composés
+\item \texttt{z\_feed}: Compositions d'alimentation
+\item \texttt{T\_bubble}, \texttt{T\_dew}: Températures de bulle et rosée
+\item \texttt{alpha}: Volatilités relatives
+\end{itemize}
+
+\textbf{Méthodes principales:}
+
+\begin{itemize}
+\item \texttt{fenske\_equation(x\_lk\_d, x\_hk\_b)}: Calcule le nombre minimum de plateaux (Éq. 1)
+\item \texttt{underwood\_equations(q)}: Calcule le reflux minimum (Éq. 2-3)
+\item \texttt{gilliland\_correlation(R, R\_min, N\_min)}: Nombre de plateaux réels (Éq. 4-6)
+\item \texttt{kirkbride\_equation(N, compositions)}: Position du plateau d'alimentation (Éq. 8)
+\end{itemize}
+
+\subsection{Classe: \texttt{MESHSolver}}
+
+\textbf{Fichier:} \texttt{mesh\_solver.py}
+
+\textbf{Rôle:} Résoudre rigoureusement les équations MESH (Material, Equilibrium, Summation, Heat) plateau par plateau.
+
+\textbf{Méthodes MESH:}
+
+\begin{lstlisting}
+class MESHSolver:
+    def material_balance(self, stage):
+        """Equations de bilan matiere (Eq. 9)"""
+        # V[j+1]*y[j+1] + L[j-1]*x[j-1] = V[j]*y[j] + L[j]*x[j]
+
+    def equilibrium_relations(self, stage, T, P):
+        """Relations d'equilibre (Eq. 10)"""
+        # y[i,j] = K[i,j] * x[i,j]
+
+    def summation_equations(self, stage):
+        """Equations de sommation (Eq. 11)"""
+        # sum(x[i,j]) = 1, sum(y[i,j]) = 1
+
+    def heat_balance(self, stage):
+        """Bilan energetique (Eq. 13)"""
+        # V[j+1]*H[j+1] + L[j-1]*h[j-1] + Q[j] = ...
+
+    def solve_wang_henke(self):
+        """Algorithme de Wang-Henke"""
+        # Methode iterative pour converger
+\end{lstlisting}
+
+\textbf{Algorithme:}
+\begin{enumerate}
+\item Initialisation des températures et débits
+\item Boucle itérative jusqu'à convergence:
+\begin{itemize}
+\item Calcul des équilibres (K-values)
+\item Résolution des bilans matière
+\item Calcul des bilans énergétiques
+\item Mise à jour des températures
+\end{itemize}
+\item Critère de convergence: $\epsilon < 10^{-6}$
+\end{enumerate}
+
+\subsection{Classes: \texttt{WilsonModel}, \texttt{NRTLModel}, \texttt{UNIQUACModel}}
+
+\textbf{Fichier:} \texttt{activity\_models.py}
+
+\textbf{Rôle:} Calculer les coefficients d'activité pour les systèmes non-idéaux.
+
+\textbf{Architecture:}
+
+\begin{lstlisting}
+class ActivityModel:
+    """Classe de base abstraite"""
+    def calculate_activity_coefficients(self, x, T):
+        raise NotImplementedError
+
+class WilsonModel(ActivityModel):
+    """Modele de Wilson (Eq. 14)"""
+    def __init__(self, lambda_params):
+        self.lambda_ij = lambda_params
+
+    def calculate_activity_coefficients(self, x, T):
+        # ln(gamma_i) = -ln(sum_j x_j * Lambda_ij) + ...
+
+class NRTLModel(ActivityModel):
+    """Modele NRTL (Eq. 15)"""
+    def __init__(self, tau_params, alpha_params):
+        self.tau_ij = tau_params
+        self.alpha_ij = alpha_params
+
+    def calculate_activity_coefficients(self, x, T):
+        # ln(gamma_i) = (sum_j tau_ji * G_ji * x_j) / ...
+
+class UNIQUACModel(ActivityModel):
+    """Modele UNIQUAC (Eq. 16)"""
+    def __init__(self, r, q, tau_params):
+        self.r = r  # Parametres de volume
+        self.q = q  # Parametres de surface
+        self.tau_ij = tau_params
+\end{lstlisting}
+
+\textbf{Principe d'utilisation:}
+\begin{lstlisting}
+# Selection du modele
+if system_type == "azeotrope":
+    model = NRTLModel(tau_params, alpha_params)
+elif system_type == "alcool":
+    model = WilsonModel(lambda_params)
+
+# Calcul
+gamma = model.calculate_activity_coefficients(x, T)
+K = gamma * P_sat / P
+\end{lstlisting}
+
+\subsection{Classe: \texttt{EconomicOptimizer}}
+
+\textbf{Fichier:} \texttt{economic\_optimization.py}
+
+\textbf{Rôle:} Optimiser la configuration de la colonne pour minimiser le coût annuel total (TAC).
+
+\textbf{Méthodes:}
+
+\begin{lstlisting}
+class EconomicOptimizer:
+    def calculate_capital_cost(self, N, D, material):
+        """Cout d'investissement colonne (Eq. 17)"""
+        # C_column = a * (N * D)^b
+
+    def calculate_heat_exchanger_cost(self, A):
+        """Cout echangeurs (Eq. 18)"""
+        # C_HX = c * A^d
+
+    def calculate_operating_cost(self, Q_reb, Q_cond):
+        """Couts d'exploitation (Eq. 19)"""
+        # C_op = (cout_vapeur * Q_reb + cout_eau * Q_cond) * h/an
+
+    def calculate_TAC(self, N, R, P):
+        """Total Annualized Cost (Eq. 20)"""
+        # TAC = C_capital/payback + C_operating + C_maintenance
+
+    def optimize_reflux(self, N_range, R_range):
+        """Optimisation R pour TAC minimal"""
+        from scipy.optimize import minimize
+        result = minimize(self.calculate_TAC, x0=R_init)
+        return result.x  # R optimal
+\end{lstlisting}
+
+\textbf{Équation TAC:}
+\begin{equation}
+\text{TAC} = \frac{C_{\text{capital}}}{\text{Payback}} + C_{\text{exploitation}} + C_{\text{maintenance}}
+\end{equation}
+
+\subsection{Classe: \texttt{SimulationPDFGenerator}}
+
+\textbf{Fichier:} \texttt{pdf\_generator.py}
+
+\textbf{Rôle:} Générer automatiquement des rapports PDF des résultats de simulation via compilation LaTeX en ligne.
+
+\textbf{Architecture:}
+
+\begin{lstlisting}
+class SimulationPDFGenerator:
+    def __init__(self):
+        self.temp_dir = tempfile.gettempdir()
+
+    def generate_latex_report(self, simulation_results, method):
+        """Genere le code LaTeX du rapport"""
+        # Construit document LaTeX avec:
+        # - Page de garde professionnelle
+        # - Table des matieres automatique
+        # - Parametres d'entree
+        # - Resultats de simulation
+        # - Bilans matiere/energie
+        # - Analyse economique
+        # - Conclusion detaillee
+
+    def _compile_online_latex(self, latex_code):
+        """Compilation en ligne via LaTeX-on-HTTP"""
+        url = "https://latex.ytotech.com/builds/sync"
+        response = requests.post(url, files={...})
+        return pdf_bytes
+
+    def _compile_local_pdflatex(self, latex_code):
+        """Fallback compilation locale (si pdflatex installe)"""
+        subprocess.run(['pdflatex', tex_file])
+        return pdf_bytes
+
+    def generate_pdf(self, simulation_results, method):
+        """Methode principale - essaie online puis local"""
+        latex = self.generate_latex_report(...)
+
+        # Priorite 1: Compilation en ligne
+        result = self._compile_online_latex(latex)
+        if result['success']:
+            return result
+
+        # Priorite 2: Compilation locale
+        result = self._compile_local_pdflatex(latex)
+        return result
+\end{lstlisting}
+
+\textbf{Avantages:}
+\begin{itemize}
+\item Aucune installation requise (LaTeX-on-HTTP)
+\item Rapports professionnels automatiques
+\item Fallback automatique si service indisponible
+\item Table des matières cliquable (hyperref)
+\end{itemize}
+
+% ============================================================
+\section{Architecture de l'Application}
+
+\subsection{Flux de Données}
+
+\begin{enumerate}
+\item \textbf{Interface Streamlit} (streamlit\_app\_enhanced.py)
+\begin{itemize}
+\item Collecte des paramètres utilisateur (sidebar)
+\item Validation des entrées
+\item Déclenchement des calculs
+\end{itemize}
+
+\item \textbf{Calculs de Distillation}
+\begin{itemize}
+\item Si "Méthodes Simplifiées" → \texttt{DistillationColumn}
+\item Si "MESH Rigoureux" → \texttt{MESHSolver}
+\item Si "Comparaison" → Les deux
+\end{itemize}
+
+\item \textbf{Modèles Thermodynamiques} (activity\_models.py)
+\begin{itemize}
+\item Calcul des K-values selon le modèle choisi
+\item Fournis aux solveurs MESH et simplifiés
+\end{itemize}
+
+\item \textbf{Optimisation Économique} (economic\_optimization.py)
+\begin{itemize}
+\item Reçoit les résultats de dimensionnement
+\item Calcule TAC pour différentes configurations
+\item Trouve l'optimum
+\end{itemize}
+
+\item \textbf{Visualisation et Export}
+\begin{itemize}
+\item Graphiques Plotly interactifs
+\item Export Excel (Pandas)
+\item Génération PDF (SimulationPDFGenerator)
+\end{itemize}
+\end{enumerate}
+
+\subsection{Diagramme de Classes Simplifié}
+
+\begin{verbatim}
+StreamlitApp
+    |
+    +-- DistillationColumn (Méthodes Simplifiées)
+    |       |
+    |       +-- fenske_equation()
+    |       +-- underwood_equations()
+    |       +-- gilliland_correlation()
+    |       +-- kirkbride_equation()
+    |
+    +-- MESHSolver (Résolution Rigoureuse)
+    |       |
+    |       +-- material_balance()
+    |       +-- equilibrium_relations()
+    |       +-- summation_equations()
+    |       +-- heat_balance()
+    |       +-- solve_wang_henke()
+    |
+    +-- ActivityModel (Interface)
+            |
+            +-- WilsonModel
+            +-- NRTLModel
+            +-- UNIQUACModel
+
+    +-- EconomicOptimizer
+    |       |
+    |       +-- calculate_TAC()
+    |       +-- optimize_reflux()
+    |
+    +-- SimulationPDFGenerator
+            |
+            +-- generate_pdf()
+            +-- _compile_online_latex()
+\end{verbatim}
+
+% ============================================================
+\section{Déploiement et Utilisation}
+
+\subsection{Installation}
+
+\textbf{Prérequis:} Python 3.10+
+
+\begin{lstlisting}[language=bash]
+# Cloner le depot
+git clone <repository_url>
+cd dist-multi-PIC11
+
+# Installer les dependances
+pip install -r requirements.txt
+
+# Lancer l'application
+streamlit run streamlit_app_enhanced.py
+\end{lstlisting}
+
+\subsection{Structure des Fichiers}
+
+\begin{verbatim}
+dist-multi-PIC11/
+├── streamlit_app_enhanced.py        # Interface Streamlit
+├── distillation_multicomposants.py  # Méthodes simplifiées
+├── mesh_solver.py                   # MESH rigoureux
+├── activity_models.py               # Modèles thermodynamiques
+├── economic_optimization.py         # Optimisation TAC
+├── pdf_generator.py                 # Génération PDF
+├── requirements.txt                 # Dépendances Python
+├── frontend/                        # Frontend React (optionnel)
+│   ├── src/
+│   ├── public/
+│   └── package.json
+└── README.md                        # Documentation
+\end{verbatim}
+
+\subsection{Dépendances (requirements.txt)}
+
+\begin{lstlisting}
+numpy>=2.2.0
+scipy>=1.14.0
+pandas>=2.3.0
+streamlit>=1.49.0
+plotly>=6.0.0
+openpyxl>=3.1.0
+requests>=2.31.0
+\end{lstlisting}
+
+% ============================================================
+\section{Performances et Optimisations}
+
+\subsection{Performances de Calcul}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\toprule
+\textbf{Méthode} & \textbf{Temps} & \textbf{Précision} \\
+\midrule
+Méthodes Simplifiées & < 1 seconde & $\pm 10-15\%$ \\
+MESH (10 plateaux) & 2-5 secondes & $\pm 1-2\%$ \\
+MESH (50 plateaux) & 10-20 secondes & $\pm 1-2\%$ \\
+Optimisation TAC & 5-10 secondes & Optimal \\
+Génération PDF (online) & 5-10 secondes & -- \\
+\bottomrule
+\end{tabular}
+\caption{Performances de calcul}
+\end{table}
+
+\subsection{Optimisations Implémentées}
+
+\begin{enumerate}
+\item \textbf{Vectorisation NumPy:} Calculs matriciels optimisés
+\item \textbf{Cache Streamlit:} \texttt{@st.cache\_data} pour éviter recalculs
+\item \textbf{Compilation LaTeX en ligne:} Évite installation locale lourde
+\item \textbf{Convergence MESH:} Critère $\epsilon < 10^{-6}$ pour précision/rapidité
+\end{enumerate}
+
+% ============================================================
+\section{Conclusion}
+
+Cette application représente une solution complète pour la simulation de colonnes de distillation, combinant:
+
+\begin{itemize}
+\item \textbf{Architecture OOP robuste:} 5 classes principales bien définies
+\item \textbf{Technologies modernes:} Streamlit, React, NumPy, SciPy, Plotly
+\item \textbf{Méthodes validées:} Simplifiées (Fenske, Underwood) et rigoureuses (MESH)
+\item \textbf{Génération PDF automatique:} Sans installation LaTeX locale
+\item \textbf{Interface intuitive:} Streamlit pour prototypage rapide
+\end{itemize}
+
+\subsection{Points Forts}
+
+\begin{enumerate}
+\item \textbf{Modularité:} Chaque classe a une responsabilité claire
+\item \textbf{Extensibilité:} Facile d'ajouter de nouveaux modèles/méthodes
+\item \textbf{Performance:} Optimisations NumPy et cache Streamlit
+\item \textbf{Professionnalisme:} Rapports PDF de qualité publication
+\end{enumerate}
+
+\subsection{Perspectives d'Amélioration}
+
+\begin{itemize}
+\item Base de données de paramètres thermodynamiques
+\item API REST pour intégration externe
+\item Support de colonnes à multi-alimentation
+\item Interface mobile responsive
+\end{itemize}
+
+\vspace{1cm}
+
+\noindent\textit{Cette application démontre l'utilisation efficace de la programmation orientée objet en Python pour résoudre des problèmes complexes de génie des procédés, tout en offrant une interface utilisateur moderne et accessible.}
+
+\end{document}

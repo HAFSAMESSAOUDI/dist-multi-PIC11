@@ -6,6 +6,9 @@ numpy>=2.2.0
 scipy>=1.14.0
 pandas>=2.3.0
 
+# HTTP requests for online LaTeX compilation
+requests>=2.31.0
+
 # Streamlit framework
 streamlit>=1.49.0
 

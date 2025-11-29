@@ -2,11 +2,8 @@
 
 Application web interactive pour la simulation et l'optimisation de colonnes de distillation multicomposants.
 
-**Module:** Modélisation et Simulation des Procédés
-**Professeur:** BAKHER Zine Elabidine
-**Filière:** Procédés Industriels et Chimiques (PIC)
-**Université:** Hassan 1er
-**Version:** 2.2
+**Technologies:** Python + Streamlit | React (Frontend optionnel)
+**Version:** 3.1
 
 ---
 
@@ -41,8 +38,10 @@ L'application s'ouvre automatiquement à http://localhost:8501
 - **MESH Rigoureux:** Algorithme Wang-Henke
 - **Modèles Thermodynamiques:** Idéal, Wilson, NRTL, UNIQUAC
 - **Optimisation Économique:** TAC (Total Annualized Cost)
+- **Génération PDF Automatique:** Compilation LaTeX en ligne (sans installation)
 - **13 Composés:** Aromatiques, Alcools, Alcanes
 - **Visualisations Interactives:** Plotly
+- **Export:** Excel, PDF
 
 ---
 
@@ -54,8 +53,12 @@ L'application s'ouvre automatiquement à http://localhost:8501
 ├── mesh_solver.py                   # MESH rigoureux
 ├── activity_models.py               # Modèles thermodynamiques
 ├── economic_optimization.py         # Optimisation TAC
+├── pdf_generator.py                 # Génération PDF (compilation en ligne)
+├── frontend/                        # Interface React (optionnelle)
 └── requirements.txt                 # Dépendances
 ```
+
+Voir [STRUCTURE.md](STRUCTURE.md) pour plus de détails.
 
 ---
 
@@ -105,9 +108,19 @@ L'application s'ouvre automatiquement à http://localhost:8501
 ## 📝 Documentation
 
 - Documentation théorique intégrée dans l'app
-- [QUICKSTART.md](QUICKSTART.md) - Guide rapide
+- [STRUCTURE.md](STRUCTURE.md) - Architecture du projet
 
 ---
 
-**Version:** 2.2
+## 🎯 Nouveautés Version 3.1
+
+- ✅ **Génération PDF automatique** - Compilation LaTeX en ligne (LaTeX-on-HTTP)
+- ✅ **Page de garde professionnelle** - Design épuré sans mentions académiques
+- ✅ **Table des matières cliquable** - Navigation interactive dans le PDF
+- ✅ **Aucune installation requise** - Pas besoin de MiKTeX ou Chocolatey
+- ✅ **Conclusion détaillée** - Résumé complet avec liste des résultats
+
+---
+
+**Version:** 3.1
 **Statut:** ✅ Production Ready

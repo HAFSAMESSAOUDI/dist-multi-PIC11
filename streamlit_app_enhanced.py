@@ -35,6 +35,7 @@ from pdf_generator import SimulationPDFGenerator
 def display_pdf_download_button(simulation_data, method_name):
     """
     Affiche un bouton pour télécharger les résultats en PDF/LaTeX
+    Compile automatiquement via service en ligne (pas besoin d'installation)
 
     Parameters
     ----------
@@ -46,34 +47,86 @@ def display_pdf_download_button(simulation_data, method_name):
     st.divider()
     st.subheader("📥 Télécharger les Résultats")
 
-    col_pdf1, col_pdf2 = st.columns(2)
+    try:
+        pdf_gen = SimulationPDFGenerator()
 
-    with col_pdf1:
-        st.markdown("**Format LaTeX (.tex)**")
-        st.caption("Fichier source LaTeX modifiable")
+        # Afficher un spinner pendant la compilation
+        with st.spinner("⏳ Génération du PDF en cours... (compilation LaTeX en ligne)"):
+            result = pdf_gen.generate_pdf(simulation_data, method_name)
 
-    with col_pdf2:
-        try:
-            pdf_gen = SimulationPDFGenerator()
-            latex_content = pdf_gen.generate_latex_only(simulation_data, method_name)
+        from datetime import datetime
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-            from datetime import datetime
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"rapport_distillation_{timestamp}.tex"
+        if result['success'] and 'pdf_bytes' in result:
+            # PDF compilé avec succès!
 
-            st.download_button(
-                label="📄 Télécharger LaTeX",
-                data=latex_content.encode('utf-8'),
-                file_name=filename,
-                mime="application/x-latex",
-                use_container_width=True,
-                type="primary"
-            )
+            # Afficher message selon la méthode utilisée
+            if result.get('method') == 'online':
+                st.success("✅ PDF généré automatiquement via compilation en ligne!")
+                st.caption("📡 Compilé avec LaTeX-on-HTTP (aucune installation requise)")
+            elif result.get('method') == 'pdflatex':
+                st.success("✅ PDF généré avec pdflatex local!")
+                st.caption("💻 Compilé avec votre installation pdflatex")
 
-            st.info("💡 Compilez ce fichier avec pdfLaTeX ou Overleaf pour obtenir un PDF professionnel")
+            col_pdf1, col_pdf2 = st.columns(2)
 
-        except Exception as e:
-            st.error(f"Erreur lors de la génération du rapport: {e}")
+            with col_pdf1:
+                st.download_button(
+                    label="📄 Télécharger PDF",
+                    data=result['pdf_bytes'],
+                    file_name=f"rapport_distillation_{timestamp}.pdf",
+                    mime="application/pdf",
+                    use_container_width=True,
+                    type="primary"
+                )
+
+            with col_pdf2:
+                st.download_button(
+                    label="📄 Télécharger LaTeX (source)",
+                    data=result['latex_code'].encode('utf-8'),
+                    file_name=f"rapport_distillation_{timestamp}.tex",
+                    mime="application/x-latex",
+                    use_container_width=True
+                )
+
+        else:
+            # Compilation PDF échouée - proposer LaTeX seulement
+            st.error(f"❌ {result.get('error', 'Compilation PDF impossible')}")
+            st.info("Vous pouvez télécharger le fichier LaTeX et le compiler manuellement sur Overleaf")
+
+            col_pdf1, col_pdf2 = st.columns(2)
+
+            with col_pdf1:
+                st.download_button(
+                    label="📄 Télécharger LaTeX",
+                    data=result['latex_code'].encode('utf-8'),
+                    file_name=f"rapport_distillation_{timestamp}.tex",
+                    mime="application/x-latex",
+                    use_container_width=True,
+                    type="primary"
+                )
+
+            with col_pdf2:
+                # Instructions pour compiler
+                with st.expander("💡 Comment obtenir le PDF?"):
+                    st.markdown("""
+                    **Option 1: Overleaf (En ligne - Gratuit)**
+                    1. Aller sur https://www.overleaf.com/
+                    2. Créer compte gratuit
+                    3. New Project → Upload Project
+                    4. Uploader le fichier .tex téléchargé
+                    5. Cliquer "Recompile"
+                    6. Télécharger le PDF
+
+                    **Option 2: Installation locale pdfLaTeX**
+                    1. Installer MiKTeX: https://miktex.org/download
+                    2. Ouvrir terminal dans le dossier du .tex
+                    3. Exécuter: `pdflatex rapport_distillation_*.tex`
+                    4. PDF généré!
+                    """)
+
+    except Exception as e:
+        st.error(f"Erreur lors de la génération du rapport: {e}")
 
 # Configuration de la page
 st.set_page_config(
