@@ -10,6 +10,7 @@ Université uh1
 
 import numpy as np
 from scipy.optimize import fsolve, brentq, minimize
+from thermo.chemical import Chemical
 import warnings
 warnings.filterwarnings('ignore')
 
